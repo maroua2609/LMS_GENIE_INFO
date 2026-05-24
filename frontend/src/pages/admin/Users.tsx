@@ -54,7 +54,7 @@ const AdminUsers: React.FC = () => {
   const handleLogout = () => { localStorage.clear(); navigate('/login'); };
   const getInitiales = () => user ? `${user.prenom?.charAt(0) || ''}${user.nom?.charAt(0) || ''}` : '??';
 
-  // Filtrage
+ 
   const filtered = useMemo(() => {
     let list = utilisateurs;
     if (roleFilter !== 'tous') {
@@ -72,7 +72,7 @@ const AdminUsers: React.FC = () => {
     return list;
   }, [utilisateurs, search, roleFilter]);
 
-  // Actions
+  
   const toggleActif = async (userId: number, actuel: boolean) => {
     try {
       await api.put(`/admin/users/${userId}/toggle-actif`);
@@ -112,7 +112,7 @@ const AdminUsers: React.FC = () => {
             <ShieldCheck size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ADMINISTRATEUR</p>
           </div>
         </div>
@@ -126,9 +126,8 @@ const AdminUsers: React.FC = () => {
         </nav>
 
         <nav className="space-y-1 mt-auto">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
-          <Link to="/admin/activite" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><TrendingUp size={18} /> Activité</Link>
-          <Link to="/admin/forum" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><MessageCircle size={18} /> Forum</Link>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3"></p>
+          
         </nav>
 
         <div className="pt-6 border-t border-gray-800 mt-6">
@@ -140,7 +139,7 @@ const AdminUsers: React.FC = () => {
         </div>
       </aside>
 
-      {/* Contenu principal */}
+      
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -153,7 +152,7 @@ const AdminUsers: React.FC = () => {
           </Link>
         </div>
 
-        {/* Cartes stats */}
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-5">
             <Users size={24} className="text-blue-400 mb-3" />
@@ -177,7 +176,7 @@ const AdminUsers: React.FC = () => {
           </div>
         </div>
 
-        {/* Filtres */}
+        
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -206,7 +205,7 @@ const AdminUsers: React.FC = () => {
           </div>
         </div>
 
-        {/* Tableau */}
+        
         <div className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead>
@@ -282,7 +281,7 @@ const AdminUsers: React.FC = () => {
         </div>
       </main>
 
-      {/* Modal de confirmation de suppression */}
+      
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md">

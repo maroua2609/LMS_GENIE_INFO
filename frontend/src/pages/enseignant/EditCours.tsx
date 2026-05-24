@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 interface RessourceForm {
-  id?: number;            // présent si ressource existante
+  id?: number;            
   titre: string;
   description: string;
   type: 'pdf' | 'video' | 'code' | 'lien' | 'autre';
@@ -38,7 +38,7 @@ const EnseignantEditCours: React.FC = () => {
   const [error, setError] = useState('');
   const [pageLoading, setPageLoading] = useState(true);
 
-  // Charger le cours existant et les modules
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -56,7 +56,7 @@ const EnseignantEditCours: React.FC = () => {
         });
         setModules(modulesRes.data);
 
-        // Charger les ressources du cours
+        
         const ressourcesRes = await api.get(`/cours/${id}/ressources`);
         const ressourcesData = ressourcesRes.data.map((r: any) => ({
           id: r.id,

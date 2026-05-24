@@ -44,6 +44,11 @@ interface StatsGlobales {
   a_risque: number;
 }
 
+interface DetailEtudiant {
+  modules_progression: ModuleProgression[];
+  quiz_resultats: QuizResultat[];
+}
+
 type TriType = 'progression_desc' | 'progression_asc' | 'nom_asc' | 'nom_desc' | 'quiz_desc' | 'quiz_asc';
 
 // ─── Composant ─────────────────────────────────────────────────────────────────
@@ -57,13 +62,14 @@ const EnseignantNotes: React.FC = () => {
   const [search, setSearch] = useState('');
   const [tri, setTri] = useState<TriType>('progression_desc');
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [detail, setDetail] = useState<{ modules_progression: ModuleProgression[]; quiz_resultats: QuizResultat[] } | null>(null);
+  // FIX 1 : detail est un Map par etudiant_id pour éviter les mélanges
+  const [detailMap, setDetailMap] = useState<Record<number, DetailEtudiant>>({});
+  const [detailLoading, setDetailLoading] = useState<number | null>(null);
   const navigate = useNavigate();
 
-  // Chargement initial des modules
+  // FIX 3 : utilisateur chargé via l'API, pas localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('user');
-    if (stored) setUser(JSON.parse(stored));
+    api.get('/auth/me').then(res => setUser(res.data)).catch(console.error);
     api.get<Module[]>('/modules').then(res => setModules(res.data)).catch(console.error);
   }, []);
 
@@ -78,6 +84,9 @@ const EnseignantNotes: React.FC = () => {
       .then(([etudiantsRes, statsRes]) => {
         setEtudiants(etudiantsRes.data);
         setStats(statsRes.data);
+        // Réinitialiser les détails ouverts si le module change
+        setExpandedId(null);
+        setDetailMap({});
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -104,38 +113,45 @@ const EnseignantNotes: React.FC = () => {
     return filtered;
   }, [etudiants, search, tri]);
 
+  // FIX 1 : chaque étudiant a son propre détail dans detailMap
   const toggleExpand = async (etudiantId: number) => {
-    if (expandedId === etudiantId) { setExpandedId(null); setDetail(null); return; }
-    setExpandedId(etudiantId);
-    try {
-      const res = await api.get(`/enseignant/etudiants/${etudiantId}/detail`);
-      setDetail(res.data);
-    } catch (err) { console.error(err); }
-  };
-
-  const handleExportCSV = async () => {
-  try {
-    const token = localStorage.getItem('access_token');
-    const params = selectedModule ? `?module_id=${selectedModule}` : '';
-    const response = await fetch(`http://localhost:8000/api/enseignant/export/notes-complet${params}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!response.ok) {
-      alert('Erreur lors du téléchargement');
+    if (expandedId === etudiantId) {
+      setExpandedId(null);
       return;
     }
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'notes_detaillees.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error(err);
-    alert('Erreur réseau');
-  }
-};
+    setExpandedId(etudiantId);
+    // Ne recharge pas si déjà en cache
+    if (detailMap[etudiantId]) return;
+    setDetailLoading(etudiantId);
+    try {
+      const res = await api.get<DetailEtudiant>(`/enseignant/etudiants/${etudiantId}/detail`);
+      setDetailMap(prev => ({ ...prev, [etudiantId]: res.data }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetailLoading(null);
+    }
+  };
+
+  // FIX 4 : export via l'instance api (baseURL centralisée)
+  const handleExportCSV = async () => {
+    try {
+      const params = selectedModule ? { module_id: selectedModule } : {};
+      const response = await api.get('/enseignant/export/notes-complet', {
+        params,
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'notes_detaillees.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors du téléchargement');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
@@ -146,19 +162,20 @@ const EnseignantNotes: React.FC = () => {
             <GraduationCap size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ENSEIGNANT</p>
           </div>
         </div>
 
         <nav className="space-y-1 mb-6">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Enseignement</p>
-          <Link to="/enseignant/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><BarChart3 size={18} /> Tableau de bord</Link>
-          <Link to="/enseignant/modules" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><BookOpen size={18} /> Mes modules</Link>
-          <Link to="/enseignant/ressources" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><FileText size={18} /> Ressources</Link>
-          <Link to="/enseignant/annonces" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><Megaphone size={18} /> Annonces</Link>
-          <Link to="/enseignant/quiz/create" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><ClipboardCheck size={18} /> Évaluations</Link>
-        </nav>
+                  <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Enseignement</p>
+                  <Link to="/enseignant/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 font-medium text-sm"><BarChart3 size={18} /> Tableau de bord</Link>
+                  <Link to="/enseignant/modules" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Mes modules</Link>
+                  <Link to="/enseignant/ressources" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><FileText size={18} /> Ressources</Link>
+                  <Link to="/enseignant/annonces" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><Megaphone size={18} /> Annonces</Link>
+                  <Link to="/enseignant/quiz/create" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Évaluations</Link>
+                  <Link to="/enseignant/notes" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Progression</Link>
+                </nav>
 
         <nav className="space-y-1 mt-auto">
           <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
@@ -171,7 +188,10 @@ const EnseignantNotes: React.FC = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">{getInitiales()}</div>
             <div><p className="text-white text-sm">{user?.prenom} {user?.nom}</p><p className="text-gray-500 text-xs">Enseignant</p></div>
           </div>
-          <button onClick={handleLogout} className="text-gray-500 hover:text-red-400 text-sm"><LogOut size={16} /> Déconnexion</button>
+          {/* FIX 5 : flex items-center gap-1 pour aligner icône et texte */}
+          <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-red-400 text-sm transition-colors">
+            <LogOut size={16} /> Déconnexion
+          </button>
         </div>
       </aside>
 
@@ -258,99 +278,124 @@ const EnseignantNotes: React.FC = () => {
           </div>
         </div>
 
-        {/* Liste des étudiants */}
-        <div className="space-y-2">
-          {filteredEtudiants.map((etudiant) => (
-            <div key={etudiant.id} className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between p-5 cursor-pointer hover:bg-gray-800/30 transition-all"
-                onClick={() => toggleExpand(etudiant.id)}>
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 font-bold">
-                    {etudiant.prenom.charAt(0)}{etudiant.nom.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold">{etudiant.prenom} {etudiant.nom}</h3>
-                    <p className="text-gray-400 text-xs">{etudiant.email}</p>
-                  </div>
-                </div>
+        {/* FIX 2 : spinner affiché pendant le chargement */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500/30 border-t-emerald-500"></div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filteredEtudiants.map((etudiant) => {
+              // FIX 1 : détail propre à chaque étudiant
+              const etudiantDetail = detailMap[etudiant.id] ?? null;
+              const isLoadingDetail = detailLoading === etudiant.id;
 
-                <div className="hidden md:flex items-center gap-6 mr-6">
-                  <div className="text-center">
-                    <p className="text-gray-400 text-xs">Progression</p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 bg-gray-800 rounded-full overflow-hidden">
-                        <div className={`h-2 rounded-full ${etudiant.progression_moyenne < 30 ? 'bg-red-500' : 'bg-emerald-500'}`}
-                          style={{ width: `${Math.min(etudiant.progression_moyenne, 100)}%` }}></div>
+              return (
+                <div key={etudiant.id} className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden">
+                  <div className="flex items-center justify-between p-5 cursor-pointer hover:bg-gray-800/30 transition-all"
+                    onClick={() => toggleExpand(etudiant.id)}>
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 font-bold">
+                        {etudiant.prenom.charAt(0)}{etudiant.nom.charAt(0)}
                       </div>
-                      <span className="text-white font-bold text-sm">{etudiant.progression_moyenne}%</span>
+                      <div>
+                        <h3 className="text-white font-semibold">{etudiant.prenom} {etudiant.nom}</h3>
+                        <p className="text-gray-400 text-xs">{etudiant.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="hidden md:flex items-center gap-6 mr-6">
+                      <div className="text-center">
+                        <p className="text-gray-400 text-xs">Progression</p>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-2 bg-gray-800 rounded-full overflow-hidden">
+                            <div className={`h-2 rounded-full ${etudiant.progression_moyenne < 30 ? 'bg-red-500' : 'bg-emerald-500'}`}
+                              style={{ width: `${Math.min(etudiant.progression_moyenne, 100)}%` }}></div>
+                          </div>
+                          <span className="text-white font-bold text-sm">{etudiant.progression_moyenne}%</span>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400 text-xs">Meilleure note</p>
+                        {/* FIX 6 : protection sur meilleure_note undefined */}
+                        <p className="text-white font-bold text-sm">
+                          {etudiant.meilleure_note != null ? `${etudiant.meilleure_note}/20` : '—'}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400 text-xs">Quiz</p>
+                        <p className="text-white font-bold text-sm">{etudiant.quiz_soumis}</p>
+                      </div>
+                      {etudiant.progression_moyenne < 30 && (
+                        <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-medium">À risque</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {expandedId === etudiant.id ? <ChevronDown size={20} className="text-gray-400" /> : <ChevronRight size={20} className="text-gray-400" />}
                     </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-gray-400 text-xs">Meilleure note</p>
-                    <p className="text-white font-bold text-sm">{etudiant.meilleure_note ? `${etudiant.meilleure_note}/20` : '—'}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-gray-400 text-xs">Quiz</p>
-                    <p className="text-white font-bold text-sm">{etudiant.quiz_soumis}</p>
-                  </div>
-                  {etudiant.progression_moyenne < 30 && (
-                    <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-medium">À risque</span>
+
+                  {/* Panneau détaillé — FIX 1 : données isolées par étudiant */}
+                  {expandedId === etudiant.id && (
+                    <div className="border-t border-gray-800 p-6 bg-gray-900/30">
+                      {isLoadingDetail ? (
+                        <div className="flex justify-center py-6">
+                          <div className="animate-spin rounded-full h-8 w-8 border-4 border-emerald-500/30 border-t-emerald-500"></div>
+                        </div>
+                      ) : etudiantDetail ? (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                              <BarChart3 size={16} className="text-emerald-400" /> Progression par module
+                            </h4>
+                            {etudiantDetail.modules_progression.map((mod) => (
+                              <div key={mod.code} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-b-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: mod.couleur }}></span>
+                                  <span className="text-white text-sm">{mod.code}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-400 text-xs">{mod.cours_consultees}/{mod.total_cours} cours</span>
+                                  <div className="w-16 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${mod.progression_moyenne}%` }}></div>
+                                  </div>
+                                  <span className="text-white text-xs font-semibold w-8 text-right">{Math.round(mod.progression_moyenne)}%</span>
+                                </div>
+                              </div>
+                            ))}
+                            {etudiantDetail.modules_progression.length === 0 && <p className="text-gray-500 text-sm">Aucun module.</p>}
+                          </div>
+                          <div>
+                            <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                              <Target size={16} className="text-purple-400" /> Derniers quiz
+                            </h4>
+                            {etudiantDetail.quiz_resultats.map((quiz, idx) => (
+                              <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-b-0">
+                                <div>
+                                  <p className="text-white text-sm">{quiz.titre}</p>
+                                  <p className="text-gray-500 text-xs">{quiz.code} – {new Date(quiz.fin_le).toLocaleDateString('fr-FR')}</p>
+                                </div>
+                                <span className={`font-bold text-sm ${quiz.note_obtenue >= 10 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {quiz.note_obtenue}/20
+                                </span>
+                              </div>
+                            ))}
+                            {etudiantDetail.quiz_resultats.length === 0 && <p className="text-gray-500 text-sm">Aucun quiz soumis.</p>}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-center py-4">Impossible de charger les détails.</p>
+                      )}
+                    </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  {expandedId === etudiant.id ? <ChevronDown size={20} className="text-gray-400" /> : <ChevronRight size={20} className="text-gray-400" />}
-                </div>
-              </div>
-
-              {/* Panneau détaillé */}
-              {expandedId === etudiant.id && detail && (
-                <div className="border-t border-gray-800 p-6 bg-gray-900/30">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                        <BarChart3 size={16} className="text-emerald-400" /> Progression par module
-                      </h4>
-                      {detail.modules_progression.map((mod) => (
-                        <div key={mod.code} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-b-0">
-                          <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: mod.couleur }}></span>
-                            <span className="text-white text-sm">{mod.code}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-400 text-xs">{mod.cours_consultees}/{mod.total_cours} cours</span>
-                            <div className="w-16 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${mod.progression_moyenne}%` }}></div>
-                            </div>
-                            <span className="text-white text-xs font-semibold w-8 text-right">{Math.round(mod.progression_moyenne)}%</span>
-                          </div>
-                        </div>
-                      ))}
-                      {detail.modules_progression.length === 0 && <p className="text-gray-500 text-sm">Aucun module.</p>}
-                    </div>
-                    <div>
-                      <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                        <Target size={16} className="text-purple-400" /> Derniers quiz
-                      </h4>
-                      {detail.quiz_resultats.map((quiz, idx) => (
-                        <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-b-0">
-                          <div>
-                            <p className="text-white text-sm">{quiz.titre}</p>
-                            <p className="text-gray-500 text-xs">{quiz.code} – {new Date(quiz.fin_le).toLocaleDateString('fr-FR')}</p>
-                          </div>
-                          <span className={`font-bold text-sm ${quiz.note_obtenue >= 10 ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {quiz.note_obtenue}/20
-                          </span>
-                        </div>
-                      ))}
-                      {detail.quiz_resultats.length === 0 && <p className="text-gray-500 text-sm">Aucun quiz soumis.</p>}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-          {filteredEtudiants.length === 0 && <p className="text-gray-500 text-center py-12">Aucun étudiant trouvé.</p>}
-        </div>
+              );
+            })}
+            {filteredEtudiants.length === 0 && (
+              <p className="text-gray-500 text-center py-12">Aucun étudiant trouvé.</p>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

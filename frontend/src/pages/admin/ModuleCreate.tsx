@@ -140,7 +140,7 @@ const ModuleCreate: React.FC = () => {
             <ShieldCheck size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ADMINISTRATEUR</p>
           </div>
         </div>
@@ -152,10 +152,8 @@ const ModuleCreate: React.FC = () => {
           <Link to="/admin/moderation" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><ShieldCheck size={18} /> Modération</Link>
         </nav>
         <nav className="space-y-1 mt-auto">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
-          <Link to="/admin/activite" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><TrendingUp size={18} /> Activité</Link>
-          <Link to="/admin/forum" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><MessageCircle size={18} /> Forum</Link>
-        </nav>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3"></p>
+          </nav>
         <div className="pt-6 border-t border-gray-800 mt-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-violet-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">{getInitiales()}</div>
@@ -211,8 +209,7 @@ const ModuleCreate: React.FC = () => {
                   <option value="1">1ère année</option>
                   <option value="2">2ème année</option>
                   <option value="3">3ème année</option>
-                  <option value="M1">Master 1</option>
-                  <option value="M2">Master 2</option>
+                  
                 </select>
               </div>
               <div>

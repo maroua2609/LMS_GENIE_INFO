@@ -144,33 +144,27 @@ const EnseignantAnnonces: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
-      {/* Sidebar */}
+      
       <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-gray-900/30 border-r border-gray-800/50 p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
             <GraduationCap size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ENSEIGNANT</p>
           </div>
         </div>
 
         <nav className="space-y-1 mb-6">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Enseignement</p>
-          <Link to="/enseignant/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm">
-            <BarChart3 size={18} /> Tableau de bord
-          </Link>
-          <Link to="/enseignant/modules" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm">
-            <BookOpen size={18} /> Mes modules
-          </Link>
-          <Link to="/enseignant/ressources" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm">
-            <FileText size={18} /> Ressources
-          </Link>
-          <Link to="/enseignant/annonces" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 font-medium text-sm">
-            <Megaphone size={18} /> Annonces
-          </Link>
-        </nav>
+                          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Enseignement</p>
+                          <Link to="/enseignant/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 font-medium text-sm"><BarChart3 size={18} /> Tableau de bord</Link>
+                          <Link to="/enseignant/modules" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Mes modules</Link>
+                          <Link to="/enseignant/ressources" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><FileText size={18} /> Ressources</Link>
+                          <Link to="/enseignant/annonces" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><Megaphone size={18} /> Annonces</Link>
+                          <Link to="/enseignant/quiz/create" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Évaluations</Link>
+                          <Link to="/enseignant/notes" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Progression</Link>
+                        </nav>
 
         <nav className="space-y-1 mt-auto">
           <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
@@ -198,14 +192,14 @@ const EnseignantAnnonces: React.FC = () => {
         </div>
       </aside>
 
-      {/* Contenu principal */}
+      
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold text-white mb-2">Annonces</h1>
           <p className="text-gray-400 mb-8">Informez vos étudiants des actualités importantes.</p>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Formulaire de création */}
+            
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <PlusCircle size={20} className="text-emerald-400" />
@@ -224,7 +218,7 @@ const EnseignantAnnonces: React.FC = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Cible (module) */}
+                
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">Cible</label>
                   <select
@@ -239,7 +233,7 @@ const EnseignantAnnonces: React.FC = () => {
                   </select>
                 </div>
 
-                {/* Type */}
+                
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">Type</label>
                   <select
@@ -253,7 +247,7 @@ const EnseignantAnnonces: React.FC = () => {
                   </select>
                 </div>
 
-                {/* Titre */}
+                
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">Titre</label>
                   <input
@@ -266,7 +260,7 @@ const EnseignantAnnonces: React.FC = () => {
                   />
                 </div>
 
-                {/* Message */}
+                
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">Message</label>
                   <textarea
@@ -280,7 +274,7 @@ const EnseignantAnnonces: React.FC = () => {
                   <p className="text-gray-500 text-xs mt-1 text-right">{form.contenu.length}/1000</p>
                 </div>
 
-                {/* Signature */}
+                
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">Signature</label>
                   <div className="flex items-center gap-3 bg-gray-800/30 rounded-xl px-4 py-3">
@@ -302,7 +296,7 @@ const EnseignantAnnonces: React.FC = () => {
               </form>
             </div>
 
-            {/* Liste des annonces */}
+            
             <div className="lg:col-span-2 bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Megaphone size={20} className="text-emerald-400" />
@@ -345,7 +339,7 @@ const EnseignantAnnonces: React.FC = () => {
                             )}
                           </div>
                         </div>
-                        {/* Bouton suppression (auteur seulement) */}
+                        
                         {annonce.auteur_prenom === user?.prenom && annonce.auteur_nom === user?.nom && (
                           <button
                             onClick={() => handleDelete(annonce.id)}

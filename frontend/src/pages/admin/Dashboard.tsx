@@ -59,14 +59,14 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
-      {/* Sidebar Admin */}
+      {/* hada le sidebar --- */}
       <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-gray-900/30 border-r border-gray-800/50 p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
             <ShieldCheck size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ADMINISTRATEUR</p>
           </div>
         </div>
@@ -80,9 +80,8 @@ const AdminDashboard: React.FC = () => {
         </nav>
 
         <nav className="space-y-1 mt-auto">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communalité</p>
-          <Link to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><TrendingUp size={18} /> Activité</Link>
-          <Link to="/admin/forum" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><MessageCircle size={18} /> Forum</Link>
+          
+          
         </nav>
 
         <div className="pt-6 border-t border-gray-800 mt-6">
@@ -94,9 +93,9 @@ const AdminDashboard: React.FC = () => {
         </div>
       </aside>
 
-      {/* Contenu principal */}
+      {/* C est le --Contenu principal-------*/}
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
-        {/* En-tête avec alerte dynamique */}
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">Tableau de bord</h1>
           <p className="text-gray-400 mt-1">Vue d'ensemble de la plateforme</p>
@@ -107,12 +106,12 @@ const AdminDashboard: React.FC = () => {
                 {data.comptes_suspendus} compte{data.comptes_suspendus > 1 ? 's' : ''} suspendu{data.comptes_suspendus > 1 ? 's' : ''} — à examiner dans la gestion des utilisateurs.
               </p>
             ) : (
-              <p className="text-amber-300 text-sm">Tous les comptes sont actifs. Pilotez les utilisateurs, modules et activité de CodexLMS.</p>
+              <p className="text-amber-300 text-sm">Tous les comptes sont actifs. Pilotez les utilisateurs, modules et activité de GINFLMS.</p>
             )}
           </div>
         </div>
 
-        {/* Cartes statistiques (6) */}
+        {/* FORMA CARTE statistiques */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4 text-center">
             <Users size={24} className="text-blue-400 mx-auto mb-2" />
@@ -146,7 +145,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Derniers utilisateurs & Annonces récentes */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Derniers utilisateurs */}
           <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
@@ -172,7 +171,7 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Annonces récentes */}
+          {/* derniers --Annonces récentes */}
           <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white font-semibold">Annonces récentes</h3>
@@ -202,7 +201,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Actions rapides */}
+        {/* hadou les fonctionnalites que l admin peut faire */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link to="/admin/users" className="group bg-gray-900/50 border border-gray-800 rounded-2xl p-5 hover:border-purple-500/30 transition-all flex items-center gap-4">
             <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">

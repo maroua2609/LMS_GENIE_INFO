@@ -160,33 +160,27 @@ const EnseignantCreateCours: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 flex">
-      {/* ========== SIDEBAR ENSEIGNANT ========== */}
+      
       <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-slate-900/30 border-r border-slate-800/50 p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
             <GraduationCap size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-slate-500 text-xs">ESPACE ENSEIGNANT</p>
           </div>
         </div>
 
         <nav className="space-y-1 mb-6">
-          <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-3">Enseignement</p>
-          <Link to="/enseignant/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium text-sm transition-all">
-            <BarChart3 size={18} /> Tableau de bord
-          </Link>
-          <Link to="/enseignant/modules" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium text-sm transition-all">
-            <BookOpen size={18} /> Mes modules
-          </Link>
-          <Link to="/enseignant/cours/create" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 font-medium text-sm">
-            <FileText size={18} /> Ressources
-          </Link>
-          <Link to="/annonces" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 font-medium text-sm transition-all">
-            <Megaphone size={18} /> Annonces
-          </Link>
-        </nav>
+                  <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Enseignement</p>
+                  <Link to="/enseignant/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 font-medium text-sm"><BarChart3 size={18} /> Tableau de bord</Link>
+                  <Link to="/enseignant/modules" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Mes modules</Link>
+                  <Link to="/enseignant/ressources" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><FileText size={18} /> Ressources</Link>
+                  <Link to="/enseignant/annonces" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><Megaphone size={18} /> Annonces</Link>
+                  <Link to="/enseignant/quiz/create" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Évaluations</Link>
+                  <Link to="/enseignant/notes" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Progression</Link>
+                </nav>
 
         <nav className="space-y-1 mt-auto">
           <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
@@ -214,16 +208,16 @@ const EnseignantCreateCours: React.FC = () => {
         </div>
       </aside>
 
-      {/* ========== CONTENU PRINCIPAL ========== */}
+      
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto relative">
-        {/* Fond décoratif */}
+        
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-600/10 rounded-full blur-[128px]" />
           <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-600/10 rounded-full blur-[128px]" />
         </div>
 
         <div className="relative max-w-4xl mx-auto">
-          {/* Retour */}
+          
           <Link
             to="/enseignant/modules"
             className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm mb-8 transition-colors group"

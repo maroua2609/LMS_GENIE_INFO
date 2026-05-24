@@ -9,7 +9,7 @@ import {
   Search, Layers, Megaphone, Pencil, X, RefreshCw
 } from 'lucide-react';
 
-// Mapping des noms d'icônes vers composants Lucide
+
 const iconMap: Record<string, React.ElementType> = {
   database: Database,
   wifi: Wifi,
@@ -51,7 +51,7 @@ const ModuleEdit: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Récupération de l'utilisateur
+  
   useEffect(() => {
     api.get('/auth/me')
       .then(res => {
@@ -65,7 +65,7 @@ const ModuleEdit: React.FC = () => {
       });
   }, [navigate]);
 
-  // Récupération du module et des enseignants
+ 
   useEffect(() => {
     if (!id) return;
     const fetchData = async () => {
@@ -159,14 +159,14 @@ const ModuleEdit: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
-      {/* ========== SIDEBAR (identique à Modules.tsx) ========== */}
+      
       <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-gray-900/30 border-r border-gray-800/50 p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
             <ShieldCheck size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ADMINISTRATEUR</p>
           </div>
         </div>
@@ -180,10 +180,8 @@ const ModuleEdit: React.FC = () => {
         </nav>
 
         <nav className="space-y-1 mt-auto">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
-          <Link to="/admin/activite" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><TrendingUp size={18} /> Activité</Link>
-          <Link to="/admin/forum" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><MessageCircle size={18} /> Forum</Link>
-        </nav>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3"></p>
+          </nav>
 
         <div className="pt-6 border-t border-gray-800 mt-6">
           <div className="flex items-center gap-3 mb-3">
@@ -194,10 +192,10 @@ const ModuleEdit: React.FC = () => {
         </div>
       </aside>
 
-      {/* ========== CONTENU PRINCIPAL ========== */}
+      
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
-          {/* En-tête */}
+          
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <button
@@ -216,7 +214,7 @@ const ModuleEdit: React.FC = () => {
             </button>
           </div>
 
-          {/* Messages */}
+          
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400">
               {error}
@@ -228,9 +226,9 @@ const ModuleEdit: React.FC = () => {
             </div>
           )}
 
-          {/* Formulaire */}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Aperçu de l'icône actuelle */}
+            
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
               <label className="block text-gray-400 text-sm mb-3">Aperçu de l'icône</label>
               <div
@@ -244,7 +242,7 @@ const ModuleEdit: React.FC = () => {
               </p>
             </div>
 
-            {/* Champs principaux */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-gray-400 text-sm mb-2">Code *</label>
@@ -293,8 +291,7 @@ const ModuleEdit: React.FC = () => {
                   <option value="1">1ère année</option>
                   <option value="2">2ème année</option>
                   <option value="3">3ème année</option>
-                  <option value="M1">Master 1</option>
-                  <option value="M2">Master 2</option>
+                  
                 </select>
               </div>
               <div>

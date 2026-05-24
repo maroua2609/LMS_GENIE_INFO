@@ -1,6 +1,4 @@
-# ============================================================
-# LMS Génie Informatique — API Backend (Version Finale)
-# ============================================================
+
 
 from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,9 +21,7 @@ from models import (
     SujetCreate, SujetOut, Token
 )
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
+
 app = FastAPI(title="LMS Génie Informatique", version="2.0")
 
 # Dossier uploads
@@ -43,15 +39,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Sécurité
+
 SECRET_KEY = os.getenv("SECRET_KEY", "ma_super_cle_secrete_2025")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 24
 security = HTTPBearer()
 
-# ============================================================
-# UTILITAIRES
-# ============================================================
+
 
 @contextmanager
 def get_db():
@@ -115,9 +109,7 @@ def require_role(*roles: str):
         return current_user
     return checker
 
-# ============================================================
-# HEALTH CHECK
-# ============================================================
+
 
 @app.get("/api/health")
 def health_check():
@@ -129,9 +121,7 @@ def health_check():
     except Exception as e:
         return {"status": "ERROR", "database": str(e)}
 
-# ============================================================
-# AUTHENTIFICATION
-# ============================================================
+
 
 @app.post("/api/auth/register", status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate):
@@ -163,7 +153,7 @@ def login(user: UserLogin):
     access_token = create_token(db_user["id"], db_user["role"])
     refresh_token = create_token(db_user["id"], db_user["role"], timedelta(days=30))
 
-    # Stocker refresh token
+    
     with get_db() as conn:
         cur = conn.cursor()
         cur.execute(
@@ -198,9 +188,7 @@ def get_me(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return user
 
-# ============================================================
-# MODULES
-# ============================================================
+
 
 @app.get("/api/modules")
 def get_modules(current_user: dict = Depends(get_current_user)):
@@ -239,9 +227,7 @@ def get_module(module_id: int, current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Module non trouvé")
     return module
 
-# ============================================================
-# COURS
-# ============================================================
+
 
 @app.get("/api/modules/{module_id}/cours")
 def get_cours(module_id: int, current_user: dict = Depends(get_current_user)):
@@ -260,7 +246,7 @@ def get_cours_detail(cours_id: int, current_user: dict = Depends(get_current_use
     with get_db() as conn:
         cur = conn.cursor()
 
-        # Récupération du cours avec jointures
+        # hadi dernaha pour Récupération du cours avec jointures
         cur.execute(
             """SELECT c.*, 
                m.titre as module_titre, m.code as module_code, m.semestre as module_semestre,
@@ -278,11 +264,11 @@ def get_cours_detail(cours_id: int, current_user: dict = Depends(get_current_use
         if not cours:
             raise HTTPException(status_code=404, detail="Cours non trouvé")
 
-        # Récupération des ressources (dans la même connexion)
+        
         cur.execute("SELECT * FROM ressources WHERE cours_id = %s ORDER BY ordre", (cours_id,))
         ressources = cur.fetchall()
 
-    # Le dictionnaire de réponse est construit après le bloc with, c’est correct
+    
     return {
         "cours": cours,
         "ressources": ressources,
@@ -314,7 +300,7 @@ def update_ressource(
 
     with get_db() as conn:
         cur = conn.cursor()
-        # Vérifier que la ressource appartient bien à un cours créé par l'enseignant
+        # Vérifier que la ressource appartient bien à un cours crééeeee par l'enseignant
         cur.execute(
             """SELECT r.id, c.created_by
                FROM ressources r
@@ -373,7 +359,7 @@ def create_cours(cours: CoursCreate, current_user: dict = Depends(get_current_us
         )
         new_cours = cur.fetchone()
 
-        # Notifier les étudiants inscrits au module
+        # hadiiiii derttha bach notifiw les étudiants inscrits au module
         cur.execute("SELECT etudiant_id FROM inscriptions WHERE module_id = %s", (cours.module_id,))
         for etu in cur.fetchall():
             creer_notification(
@@ -414,9 +400,7 @@ def delete_cours(cours_id: int, current_user: dict = Depends(get_current_user)):
         cur.execute("DELETE FROM cours WHERE id = %s", (cours_id,))
     return {"message": "Cours supprimé"}
 
-# ============================================================
-# RESSOURCES
-# ============================================================
+
 @app.get("/api/notifications")
 def get_my_notifications(current_user: dict = Depends(get_current_user)):
     """Récupère les 30 dernières notifications de l'utilisateur"""
@@ -483,9 +467,7 @@ async def create_ressource(
         )
         return cur.fetchone()
 
-# ============================================================
-# QUIZ
-# ============================================================
+
 
 @app.get("/api/modules/{module_id}/quiz")
 def get_quiz(module_id: int, current_user: dict = Depends(get_current_user)):
@@ -496,34 +478,11 @@ def get_quiz(module_id: int, current_user: dict = Depends(get_current_user)):
 
 @app.post("/api/quiz", status_code=status.HTTP_201_CREATED)
 def create_quiz_complet(data: dict, current_user: dict = Depends(get_current_user)):
-    """Crée un quiz avec ses questions et choix.
-    Format attendu :
-    {
-        "module_id": 1,
-        "titre": "Quiz exemple",
-        "description": "...",
-        "type": "qcm",
-        "note_max": 20,
-        "duree_min": 30,
-        "questions": [
-            {
-                "enonce": "Qu'est-ce qu'une variable ?",
-                "type": "qcm",
-                "points": 4,
-                "choix": [
-                    {"texte": "Un conteneur de données", "est_correct": true},
-                    {"texte": "Un langage", "est_correct": false}
-                ]
-            }
-        ]
-    }
-    """
     if current_user["role"] not in ["enseignant", "admin"]:
         raise HTTPException(status_code=403, detail="Accès réservé")
 
     with get_db() as conn:
         cur = conn.cursor()
-        # Créer le quiz
         cur.execute(
             "INSERT INTO quiz (module_id, titre, description, type, note_max, duree_min, publie, created_by) "
             "VALUES (%s, %s, %s, %s, %s, %s, TRUE, %s) RETURNING id",
@@ -533,7 +492,6 @@ def create_quiz_complet(data: dict, current_user: dict = Depends(get_current_use
         )
         quiz_id = cur.fetchone()["id"]
 
-        # Ajouter les questions
         for q in data.get("questions", []):
             cur.execute(
                 "INSERT INTO questions (quiz_id, enonce, type, points, ordre) "
@@ -547,19 +505,23 @@ def create_quiz_complet(data: dict, current_user: dict = Depends(get_current_use
                     "VALUES (%s, %s, %s, %s)",
                     (question_id, choix["texte"], choix.get("est_correct", False), choix.get("ordre", 1))
                 )
-        # Envoyer une notification à chaque étudiant inscrit au module
-    cur.execute(
-    "SELECT etudiant_id FROM inscriptions WHERE module_id = %s",
-    (data["module_id"],)
-)
-    for etu in cur.fetchall():
-        creer_notification(
-        etu["etudiant_id"],
-        "Nouveau quiz disponible",
-        f"Le quiz '{data['titre']}' est disponible dans votre module.",
-        "quiz",
-        f"/etudiant/quiz/{quiz_id}"
-    )    
+
+        try:                                                          
+            cur.execute(
+                "SELECT etudiant_id FROM inscriptions WHERE module_id = %s",
+                (data["module_id"],)
+            )
+            for etu in cur.fetchall():
+                creer_notification(
+                    etu["etudiant_id"],
+                    "Nouveau quiz disponible",
+                    f"Le quiz '{data['titre']}' est disponible dans votre module.",
+                    "quiz",
+                    f"/etudiant/quiz/{quiz_id}"
+                )
+        except Exception as e:
+            print(f"Erreur notifications quiz : {e}")
+
     return {"message": "Quiz créé avec succès", "quiz_id": quiz_id}
 @app.get("/api/quiz/{quiz_id}/questions")
 def get_quiz_questions(quiz_id: int, current_user: dict = Depends(get_current_user)):
@@ -612,7 +574,7 @@ def get_etudiant_detail(etudiant_id: int, current_user: dict = Depends(get_curre
     with get_db() as conn:
         cur = conn.cursor()
 
-        # Vérifier que l'étudiant est bien inscrit à au moins un module de l'enseignant
+        
         cur.execute(
             """SELECT u.nom, u.prenom, u.email, u.numero_etudiant
             FROM users u
@@ -769,13 +731,13 @@ def update_quiz(quiz_id: int, data: dict, current_user: dict = Depends(get_curre
         if current_user["role"] == "enseignant" and quiz["created_by"] != current_user["user_id"]:
             raise HTTPException(status_code=403, detail="Vous n'avez pas créé ce quiz")
 
-        # Mettre à jour les infos du quiz
+        # Mettre à jour les infos du quiz moraa mandir la modification
         cur.execute(
             "UPDATE quiz SET titre=%s, description=%s, type=%s, note_max=%s, duree_min=%s WHERE id=%s",
             (data.get("titre"), data.get("description"), data.get("type"), data.get("note_max"), data.get("duree_min"), quiz_id)
         )
 
-        # Supprimer les anciennes questions et choix (on les recrée)
+        # Supprimer les anciennes questions et choix 
         cur.execute("DELETE FROM choix_reponses WHERE question_id IN (SELECT id FROM questions WHERE quiz_id=%s)", (quiz_id,))
         cur.execute("DELETE FROM questions WHERE quiz_id=%s", (quiz_id,))
 
@@ -802,7 +764,7 @@ def get_enseignant_etudiants(current_user: dict = Depends(get_current_user), mod
         cur = conn.cursor()
         # Requête de base selon module_id
         if module_id:
-            # Vérifier que le module est bien assigné à l'enseignant
+            # hadi pour Vérifier que le module est bien assigné à l'enseignant
             cur.execute("SELECT 1 FROM enseignant_module WHERE enseignant_id = %s AND module_id = %s", (enseignant_id, module_id))
             if not cur.fetchone():
                 raise HTTPException(status_code=403, detail="Vous n'êtes pas assigné à ce module")
@@ -1024,7 +986,7 @@ def update_cours(
     with get_db() as conn:
         cur = conn.cursor()
 
-        # Récupérer le cours et son module
+        # Récupérer le cours et son moduleeee
         cur.execute(
             "SELECT created_by, module_id FROM cours WHERE id = %s",
             (cours_id,)
@@ -1033,7 +995,7 @@ def update_cours(
         if not existing:
             raise HTTPException(status_code=404, detail="Cours non trouvé")
 
-        # Vérifier les droits
+        # Vérifier les droits par rooooles
         user_id = current_user["user_id"]
         if current_user["role"] == "admin":
             pass  # admin a tous les droits
@@ -1073,166 +1035,72 @@ def update_cours(
         updated = cur.fetchone()
 
     return updated
-# ============================================================
-# PROGRESSION
-# ============================================================
 
-@app.get("/api/etudiant/progression")
-def get_progression(current_user: dict = Depends(get_current_user)):
+
+@app.get("/api/cours/{cours_id}/progression/detail")
+def get_cours_progression_detail(cours_id: int, current_user: dict = Depends(get_current_user)):
     with get_db() as conn:
         cur = conn.cursor()
-        
-        cur.execute(
-            """SELECT m.*, 
-               COALESCE(em.enseignant_nom, 'Non assigné') as enseignant_nom
-            FROM modules m
-            JOIN inscriptions i ON m.id = i.module_id
-            LEFT JOIN (
-                SELECT em.module_id, u.nom || ' ' || u.prenom as enseignant_nom
-                FROM enseignant_module em
-                JOIN users u ON em.enseignant_id = u.id
-            ) em ON m.id = em.module_id
-            WHERE i.etudiant_id = %s AND m.actif = TRUE
-            ORDER BY m.annee_niveau, m.semestre""",
-            (current_user["user_id"],)
-        )
-        modules = cur.fetchall()
-        
-        result = []
-        total_progression = 0
-        
-        for module in modules:
-            module_id = module["id"]
-            
-            cur.execute("SELECT COUNT(*) as nb FROM cours WHERE module_id = %s AND publie = TRUE", (module_id,))
-            total_lecons = cur.fetchone()["nb"]
-            
-            cur.execute(
-                """SELECT COUNT(*) as nb FROM progression_cours pc
-                JOIN cours c ON pc.cours_id = c.id
-                WHERE pc.etudiant_id = %s AND c.module_id = %s AND pc.progression > 0""",
-                (current_user["user_id"], module_id)
-            )
-            lecons_consultees = cur.fetchone()["nb"]
-            
-            ratio_lecons = (lecons_consultees / total_lecons * 100) if total_lecons > 0 else 0
-            
-            cur.execute("SELECT id FROM quiz WHERE module_id = %s AND publie = TRUE", (module_id,))
-            quiz_list = cur.fetchall()
-            total_quiz = len(quiz_list)
-            
-            couverture_quiz = 0
-            somme_scores = 0
-            for quiz in quiz_list:
-                cur.execute(
-                    """SELECT note_obtenue FROM tentatives_quiz
-                    WHERE quiz_id = %s AND etudiant_id = %s AND soumis = TRUE
-                    ORDER BY note_obtenue DESC LIMIT 1""",
-                    (quiz["id"], current_user["user_id"])
-                )
-                best = cur.fetchone()
-                if best:
-                    couverture_quiz += 1
-                    somme_scores += min(float(best["note_obtenue"]) / 20 * 100, 100)
-            
-            ratio_quiz_couverture = (couverture_quiz / total_quiz * 100) if total_quiz > 0 else 0
-            ratio_quiz_moyenne = (somme_scores / couverture_quiz) if couverture_quiz > 0 else 0
-            ratio_quiz = (ratio_quiz_couverture * 0.5 + ratio_quiz_moyenne * 0.5)
-            
-            progression_module = round(ratio_lecons * 0.6 + ratio_quiz * 0.4, 1)
-            total_progression += progression_module
-            
-            result.append({
-                "module_id": module_id,
-                "code": module["code"],
-                "titre": module["titre"],
-                "couleur": module["couleur"],
-                "enseignant_nom": module["enseignant_nom"],
-                "total_lecons": total_lecons,
-                "lecons_consultees": lecons_consultees,
-                "ratio_lecons": round(ratio_lecons, 1),
-                "total_quiz": total_quiz,
-                "quiz_completes": couverture_quiz,
-                "ratio_quiz": round(ratio_quiz, 1),
-                "progression": progression_module
-            })
-        
-        progression_globale = round(total_progression / len(modules), 1) if modules else 0
-    
-    return {
-        "modules": result,
-        "progression_globale": progression_globale,
-        "nb_modules": len(modules)
-    }
 
-
-@app.post("/api/cours/{cours_id}/valider-hybride")
-async def valider_cours_hybride(
-    cours_id: int,
-    temps_passe: int = Form(0),
-    ressources_ouvertes: str = Form(""),
-    quiz_id: int = Form(0),
-    current_user: dict = Depends(get_current_user)
-):
-    with get_db() as conn:
-        cur = conn.cursor()
-        
-        # Score temps (30%) - Max 10 minutes
-        TEMPS_MAX = 600
-        score_temps = min(temps_passe / TEMPS_MAX, 1.0) * 30
-        
-        # Score ressources (30%)
-        cur.execute("SELECT COUNT(*) as nb FROM ressources WHERE cours_id = %s", (cours_id,))
-        total_ressources = cur.fetchone()["nb"]
-        ressources_ids = [int(x) for x in ressources_ouvertes.split(",") if x.strip()]
-        ressources_consultees = len(set(ressources_ids))
-        score_ressources = (ressources_consultees / total_ressources * 30) if total_ressources > 0 else 0
-        
-        # Score quiz (40%)
-        score_quiz = 0
-        if quiz_id > 0:
-            cur.execute(
-                """SELECT note_obtenue FROM tentatives_quiz 
-                WHERE quiz_id = %s AND etudiant_id = %s AND soumis = TRUE 
-                ORDER BY note_obtenue DESC LIMIT 1""",
-                (quiz_id, current_user["user_id"])
-            )
-            tentative = cur.fetchone()
-            if tentative:
-                score_quiz = min((float(tentative["note_obtenue"]) / 20) * 40, 40)
-        
-        progression = min(round(score_temps + score_ressources + score_quiz), 100)
-        
+        # 1. Ressources consultées 
         cur.execute(
-            "SELECT * FROM progression_cours WHERE etudiant_id = %s AND cours_id = %s",
+            "SELECT ressource_id FROM ressources_consultees WHERE etudiant_id = %s AND cours_id = %s",
             (current_user["user_id"], cours_id)
         )
-        existing = cur.fetchone()
-        
-        if existing:
-            cur.execute(
-                "UPDATE progression_cours SET progression = %s, complete = %s, derniere_activite = NOW() WHERE id = %s",
-                (progression, progression >= 100, existing["id"])
-            )
-        else:
-            cur.execute(
-                "INSERT INTO progression_cours (etudiant_id, cours_id, progression, complete, derniere_activite) VALUES (%s, %s, %s, %s, NOW())",
-                (current_user["user_id"], cours_id, progression, progression >= 100)
-            )
-    
-    return {
-        "message": "Progression calculée",
-        "progression": progression,
-        "details": {
-            "score_temps": round(score_temps, 1),
-            "score_ressources": round(score_ressources, 1),
-            "score_quiz": round(score_quiz, 1)
-        }
-    }
+        ressources_ids = [row["ressource_id"] for row in cur.fetchall()]
+        nb_ressources_ouvertes = len(ressources_ids)
 
-# ============================================================
-# ANNONCES
-# ============================================================
+        cur.execute("SELECT COUNT(*) as total FROM ressources WHERE cours_id = %s", (cours_id,))
+        total_ressources = cur.fetchone()["total"] or 0
+
+        if total_ressources == 0:
+            score_ressources = 60
+        else:
+            score_ressources = (nb_ressources_ouvertes / total_ressources) * 60
+
+        # 2. Quiz (meilleure note)
+        cur.execute(
+            """SELECT q.module_id FROM cours WHERE id = %s""", (cours_id,)
+        )
+        row = cur.fetchone()
+        meilleure_note = None
+        if row:
+            module_id = row["module_id"]
+            cur.execute(
+                """SELECT MAX(tq.note_obtenue) as meilleure_note
+                   FROM tentatives_quiz tq
+                   JOIN quiz q ON tq.quiz_id = q.id
+                   WHERE q.module_id = %s AND tq.etudiant_id = %s AND tq.soumis = TRUE""",
+                (module_id, current_user["user_id"])
+            )
+            meilleure_note = cur.fetchone()["meilleure_note"]
+
+        if meilleure_note is not None:
+            score_quiz = min((meilleure_note / 20) * 40, 40)
+        else:
+            score_quiz = 0
+
+        progression = min(round(score_ressources + score_quiz), 100)
+
+        # Progression déjà stockée (pour comparer, mais on renvoie celle-ci)
+        cur.execute(
+            "SELECT progression FROM progression_cours WHERE etudiant_id = %s AND cours_id = %s",
+            (current_user["user_id"], cours_id)
+        )
+        prog_stockee = cur.fetchone()
+        if prog_stockee:
+            progression = max(progression, prog_stockee["progression"])
+
+        return {
+            "progression": progression,
+            "score_ressources": round(score_ressources, 1),
+            "score_quiz": round(score_quiz, 1),
+            "ressources_ids": ressources_ids,           # ← retourne la liste
+            "total_ressources": total_ressources,
+            "meilleure_note": meilleure_note
+        }
+
+
 
 @app.get("/api/annonces")
 def get_annonces(current_user: dict = Depends(get_current_user)):
@@ -1268,7 +1136,7 @@ def get_annonces(current_user: dict = Depends(get_current_user)):
                 ORDER BY a.epingle DESC, a.created_at DESC""",
                 (current_user["user_id"], current_user["user_id"])
             )
-        # Pour les autres rôles (étudiant), on garde tout (ou on peut filtrer aussi)
+        # Pour les autres rôles (étudiant), on garde tout 
         else:
             cur.execute(
                 """SELECT a.*, u.nom as auteur_nom, u.prenom as auteur_prenom, m.titre as module_titre
@@ -1283,7 +1151,7 @@ def get_annonces(current_user: dict = Depends(get_current_user)):
     return annonces
 
 
-# Dans main.py, modifiez create_annonce :
+
 @app.post("/api/annonces", status_code=status.HTTP_201_CREATED)
 def create_annonce(annonce: AnnonceCreate, current_user: dict = Depends(get_current_user)):
     if current_user["role"] not in ["enseignant", "admin"]:
@@ -1296,9 +1164,7 @@ def create_annonce(annonce: AnnonceCreate, current_user: dict = Depends(get_curr
         )
         return cur.fetchone()
 
-# ============================================================
-# FORUM
-# ============================================================
+
 
 @app.get("/api/forum/module/{module_id}")
 def get_sujets(module_id: int, current_user: dict = Depends(get_current_user)):
@@ -1390,9 +1256,7 @@ def delete_forum_sujet(sujet_id: int, current_user: dict = Depends(get_current_u
         cur.execute("DELETE FROM forum_votes WHERE reponse_id IN (SELECT id FROM forum_reponses WHERE sujet_id = %s)", (sujet_id,))
         cur.execute("DELETE FROM forum_sujets WHERE id = %s", (sujet_id,))
     return {"message": "Sujet et réponses supprimés avec succès"}
-# ============================================================
-# ENSEIGNANT
-# ============================================================
+
 
 @app.get("/api/enseignant/cours")
 def get_enseignant_cours(current_user: dict = Depends(get_current_user)):
@@ -1425,9 +1289,7 @@ def get_enseignant_stats(current_user: dict = Depends(get_current_user)):
         nb_quiz = cur.fetchone()["nb"]
     return {"nb_cours": nb_cours, "nb_quiz": nb_quiz}
 
-# ============================================================
-# DASHBOARD ÉTUDIANT
-# ============================================================
+
 
 @app.get("/api/etudiant/dashboard")
 def get_etudiant_dashboard(current_user: dict = Depends(get_current_user)):
@@ -1476,31 +1338,170 @@ def get_etudiant_dashboard(current_user: dict = Depends(get_current_user)):
         "quiz_a_venir": quiz_a_venir,
         "annonces": annonces
     }
-# ============================================================
-# PROGRESSION AVANCÉE (Graphiques, Badges, Export)
-# ============================================================
 
-@app.get("/api/etudiant/progression/graphique")
-def get_progression_graphique(current_user: dict = Depends(get_current_user)):
-    """Données pour le graphique de progression"""
+@app.get("/api/etudiant/progression")
+def get_progression(current_user: dict = Depends(get_current_user)):
     with get_db() as conn:
         cur = conn.cursor()
-        
-        # Progression par semaine (30 derniers jours)
+ 
         cur.execute(
-            """SELECT DATE(derniere_activite) as jour, 
+            """SELECT m.*,
+               COALESCE(em.enseignant_nom, 'Non assigné') as enseignant_nom
+            FROM modules m
+            JOIN inscriptions i ON m.id = i.module_id
+            LEFT JOIN (
+                SELECT em.module_id, u.nom || ' ' || u.prenom as enseignant_nom
+                FROM enseignant_module em
+                JOIN users u ON em.enseignant_id = u.id
+            ) em ON m.id = em.module_id
+            WHERE i.etudiant_id = %s AND m.actif = TRUE
+            ORDER BY m.annee_niveau, m.semestre""",
+            (current_user["user_id"],)
+        )
+        modules = cur.fetchall()
+ 
+        result = []
+        total_progression = 0
+ 
+        for module in modules:
+            module_id = module["id"]
+ 
+            # --- Leçons ---
+            cur.execute(
+                "SELECT COUNT(*) as nb FROM cours WHERE module_id = %s AND publie = TRUE",
+                (module_id,)
+            )
+            total_lecons = cur.fetchone()["nb"]
+ 
+            cur.execute(
+                """SELECT COUNT(*) as nb FROM progression_cours pc
+                JOIN cours c ON pc.cours_id = c.id
+                WHERE pc.etudiant_id = %s AND c.module_id = %s AND pc.progression > 0""",
+                (current_user["user_id"], module_id)
+            )
+            lecons_consultees = cur.fetchone()["nb"]
+ 
+            ratio_lecons = (lecons_consultees / total_lecons * 100) if total_lecons > 0 else 0
+ 
+            # --- Quiz ---
+            cur.execute(
+                "SELECT id FROM quiz WHERE module_id = %s AND publie = TRUE",
+                (module_id,)
+            )
+            quiz_list = cur.fetchall()
+            total_quiz = len(quiz_list)
+ 
+            couverture_quiz = 0
+            somme_scores = 0
+            for quiz in quiz_list:
+                cur.execute(
+                    """SELECT note_obtenue FROM tentatives_quiz
+                    WHERE quiz_id = %s AND etudiant_id = %s AND soumis = TRUE
+                    ORDER BY note_obtenue DESC LIMIT 1""",
+                    (quiz["id"], current_user["user_id"])
+                )
+                best = cur.fetchone()
+                if best:
+                    couverture_quiz += 1
+                    somme_scores += min(float(best["note_obtenue"]) / 20 * 100, 100)
+ 
+            ratio_quiz_couverture = (couverture_quiz / total_quiz * 100) if total_quiz > 0 else 0
+            ratio_quiz_moyenne = (somme_scores / couverture_quiz) if couverture_quiz > 0 else 0
+            ratio_quiz = (ratio_quiz_couverture * 0.5 + ratio_quiz_moyenne * 0.5)
+ 
+            progression_module = round(ratio_lecons * 0.6 + ratio_quiz * 0.4, 1)
+            total_progression += progression_module
+ 
+            # --- Dernière activité ---
+            cur.execute(
+                """SELECT MAX(pc.derniere_activite) as last
+                FROM progression_cours pc
+                JOIN cours c ON pc.cours_id = c.id
+                WHERE pc.etudiant_id = %s AND c.module_id = %s""",
+                (current_user["user_id"], module_id)
+            )
+            last_row = cur.fetchone()
+            derniere_activite = last_row["last"].isoformat() if last_row and last_row["last"] else None
+ 
+            result.append({
+                "module_id": module_id,
+                "code": module["code"],
+                "titre": module["titre"],
+                "couleur": module["couleur"],
+                "enseignant_nom": module["enseignant_nom"],
+                "total_lecons": total_lecons,
+                "lecons_consultees": lecons_consultees,
+                "ratio_lecons": round(ratio_lecons, 1),
+                "total_quiz": total_quiz,
+                "quiz_completes": couverture_quiz,
+                "ratio_quiz": round(ratio_quiz, 1),
+                "progression": progression_module,
+                # NOUVEAU : module considéré complet si >= 100%
+                "module_complete": progression_module >= 100,
+                "derniere_activite": derniere_activite,
+            })
+ 
+        progression_globale = round(total_progression / len(modules), 1) if modules else 0
+ 
+    return {
+        "modules": result,
+        "progression_globale": progression_globale,
+        "nb_modules": len(modules)
+    }
+ 
+ 
+
+ 
+@app.get("/api/etudiant/progression/graphique")
+def get_progression_graphique(current_user: dict = Depends(get_current_user)):
+    from datetime import date, timedelta
+ 
+    with get_db() as conn:
+        cur = conn.cursor()
+ 
+        # Activité brute des 30 derniers jours
+        cur.execute(
+            """SELECT DATE(derniere_activite) as jour,
                COUNT(*) as cours_actifs,
                AVG(progression) as progression_moyenne
-            FROM progression_cours 
-            WHERE etudiant_id = %s 
+            FROM progression_cours
+            WHERE etudiant_id = %s
             AND derniere_activite >= NOW() - INTERVAL '30 days'
             GROUP BY DATE(derniere_activite)
             ORDER BY jour""",
             (current_user["user_id"],)
         )
-        data_jours = cur.fetchall()
-        
-        # Modules complétés
+        raw_jours = {str(r["jour"]): r for r in cur.fetchall()}
+ 
+        # Remplir les 30 jours (0 si pas d'activité)
+        today = date.today()
+        data_jours = []
+        for i in range(29, -1, -1):
+            d = today - timedelta(days=i)
+            key = str(d)
+            if key in raw_jours:
+                row = raw_jours[key]
+                data_jours.append({
+                    "jour": key,
+                    "cours_actifs": row["cours_actifs"],
+                    "progression_moyenne": round(float(row["progression_moyenne"]), 1)
+                })
+            else:
+                data_jours.append({
+                    "jour": key,
+                    "cours_actifs": 0,
+                    "progression_moyenne": 0
+                })
+ 
+        # Calcul du streak (jours consécutifs avec activité, en partant d'aujourd'hui)
+        streak = 0
+        for i in range(len(data_jours) - 1, -1, -1):
+            if data_jours[i]["cours_actifs"] > 0:
+                streak += 1
+            else:
+                break
+ 
+        # Modules complétés (au moins un cours à 100%)
         cur.execute(
             """SELECT m.code, m.titre, m.couleur, pc.progression
             FROM progression_cours pc
@@ -1510,49 +1511,59 @@ def get_progression_graphique(current_user: dict = Depends(get_current_user)):
             (current_user["user_id"],)
         )
         modules_completes = cur.fetchall()
-        
+ 
         # Stats globales
         cur.execute(
-            """SELECT 
+            """SELECT
                 COUNT(DISTINCT c.module_id) as modules_actifs,
                 COUNT(pc.id) as cours_travailles,
                 COALESCE(AVG(pc.progression), 0) as moyenne,
                 COUNT(CASE WHEN pc.complete = TRUE THEN 1 END) as cours_completes,
-                (SELECT COUNT(*) FROM tentatives_quiz WHERE etudiant_id = %s AND soumis = TRUE) as quiz_soumis,
-                (SELECT COALESCE(AVG(note_obtenue), 0) FROM tentatives_quiz WHERE etudiant_id = %s AND soumis = TRUE) as moyenne_quiz
+                (SELECT COUNT(*) FROM tentatives_quiz
+                 WHERE etudiant_id = %s AND soumis = TRUE) as quiz_soumis,
+                (SELECT COALESCE(AVG(note_obtenue), 0)
+                 FROM tentatives_quiz
+                 WHERE etudiant_id = %s AND soumis = TRUE) as moyenne_quiz
             FROM progression_cours pc
             JOIN cours c ON pc.cours_id = c.id
             WHERE pc.etudiant_id = %s""",
             (current_user["user_id"], current_user["user_id"], current_user["user_id"])
         )
         stats = cur.fetchone()
-    
+ 
+        # Ajouter le streak aux stats
+        if stats:
+            stats["streak"] = streak
+ 
     return {
         "data_jours": data_jours,
         "modules_completes": modules_completes,
         "stats": stats
     }
+ 
+ 
 
-
+ 
 @app.get("/api/etudiant/badges")
 def get_badges(current_user: dict = Depends(get_current_user)):
-    """Récupère les badges de l'étudiant"""
     with get_db() as conn:
         cur = conn.cursor()
-        
         badges = []
-        
-        # Badge : Premier module complété
+ 
+        # Premier cours complété
         cur.execute(
             """SELECT COUNT(*) as nb FROM progression_cours pc
             JOIN cours c ON pc.cours_id = c.id
             WHERE pc.etudiant_id = %s AND pc.complete = TRUE""",
             (current_user["user_id"],)
         )
-        if cur.fetchone()["nb"] >= 1:
-            badges.append({"id": "premier_cours", "nom": "Premier pas", "description": "Premier cours complété", "icone": "🌟", "date": datetime.utcnow().isoformat()})
-        
-        # Badge : 5 cours complétés
+        nb_cours_complets = cur.fetchone()["nb"]
+        if nb_cours_complets >= 1:
+            badges.append({"id": "premier_cours", "nom": "Premier pas",
+                           "description": "Premier cours complété", "icone": "🌟",
+                           "date": datetime.utcnow().isoformat()})
+ 
+        # 3 modules avec au moins 1 cours complété
         cur.execute(
             """SELECT COUNT(DISTINCT c.module_id) as nb FROM progression_cours pc
             JOIN cours c ON pc.cours_id = c.id
@@ -1560,35 +1571,84 @@ def get_badges(current_user: dict = Depends(get_current_user)):
             (current_user["user_id"],)
         )
         if cur.fetchone()["nb"] >= 3:
-            badges.append({"id": "3_modules", "nom": "Explorateur", "description": "3 modules complétés", "icone": "🏆", "date": datetime.utcnow().isoformat()})
-        
-        # Badge : Premier quiz réussi
+            badges.append({"id": "3_modules", "nom": "Explorateur",
+                           "description": "Actif dans 3 modules", "icone": "🏆",
+                           "date": datetime.utcnow().isoformat()})
+ 
+        # Premier quiz réussi (≥10/20)
         cur.execute(
-            """SELECT COUNT(*) as nb FROM tentatives_quiz 
+            """SELECT COUNT(*) as nb FROM tentatives_quiz
             WHERE etudiant_id = %s AND soumis = TRUE AND note_obtenue >= 10""",
             (current_user["user_id"],)
         )
-        if cur.fetchone()["nb"] >= 1:
-            badges.append({"id": "premier_quiz", "nom": "Quiz Master", "description": "Premier quiz réussi (≥10/20)", "icone": "🎯", "date": datetime.utcnow().isoformat()})
-        
-        # Badge : 100% progression globale
+        nb_quiz_reussis = cur.fetchone()["nb"]
+        if nb_quiz_reussis >= 1:
+            badges.append({"id": "premier_quiz", "nom": "Quiz Master",
+                           "description": "Premier quiz réussi (≥10/20)", "icone": "🎯",
+                           "date": datetime.utcnow().isoformat()})
+ 
+        # 5 quiz réussis
+        if nb_quiz_reussis >= 5:
+            badges.append({"id": "5_quiz", "nom": "Ace",
+                           "description": "5 quiz réussis", "icone": "⭐",
+                           "date": datetime.utcnow().isoformat()})
+ 
+        # Progression globale à 100%
         cur.execute(
             "SELECT COALESCE(AVG(progression), 0) as moy FROM progression_cours WHERE etudiant_id = %s",
             (current_user["user_id"],)
         )
         if cur.fetchone()["moy"] >= 100:
-            badges.append({"id": "100_pourcent", "nom": "Expert", "description": "Progression globale à 100%", "icone": "👑", "date": datetime.utcnow().isoformat()})
-        
-        # Badge : 10 quiz réussis
+            badges.append({"id": "100_pourcent", "nom": "Expert",
+                           "description": "Progression globale à 100%", "icone": "👑",
+                           "date": datetime.utcnow().isoformat()})
+ 
+        # NOUVEAU : Assidu (streak ≥ 7 jours)
         cur.execute(
-            """SELECT COUNT(*) as nb FROM tentatives_quiz 
-            WHERE etudiant_id = %s AND soumis = TRUE AND note_obtenue >= 10""",
+            """SELECT DATE(derniere_activite) as jour
+            FROM progression_cours
+            WHERE etudiant_id = %s
+            AND derniere_activite >= NOW() - INTERVAL '30 days'
+            GROUP BY DATE(derniere_activite)
+            ORDER BY jour DESC""",
             (current_user["user_id"],)
         )
-        if cur.fetchone()["nb"] >= 5:
-            badges.append({"id": "5_quiz", "nom": "Ace", "description": "5 quiz réussis", "icone": "⭐", "date": datetime.utcnow().isoformat()})
-    
+        jours_actifs = [r["jour"] for r in cur.fetchall()]
+        streak = 0
+        from datetime import date, timedelta
+        d = date.today()
+        for j in jours_actifs:
+            if j == d or j == d - timedelta(days=streak):
+                streak += 1
+            else:
+                break
+        if streak >= 7:
+            badges.append({"id": "assidu_7", "nom": "Assidu",
+                           "description": f"7 jours consécutifs d'activité ({streak} jours actuellement)",
+                           "icone": "🔥", "date": datetime.utcnow().isoformat()})
+ 
+        # NOUVEAU : Note parfaite (20/20 à un quiz)
+        cur.execute(
+            """SELECT COUNT(*) as nb FROM tentatives_quiz
+            WHERE etudiant_id = %s AND soumis = TRUE AND note_obtenue = 20""",
+            (current_user["user_id"],)
+        )
+        if cur.fetchone()["nb"] >= 1:
+            badges.append({"id": "perfect", "nom": "Parfait",
+                           "description": "20/20 à un quiz", "icone": "💎",
+                           "date": datetime.utcnow().isoformat()})
+ 
     return badges
+@app.get("/api/quiz/{quiz_id}/mes-tentatives")
+def get_mes_tentatives(quiz_id: int, current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id, note_obtenue, fin_le FROM tentatives_quiz WHERE quiz_id = %s AND etudiant_id = %s AND soumis = TRUE ORDER BY note_obtenue DESC",
+            (quiz_id, current_user["user_id"])
+        )
+        return cur.fetchall()
+
 
 
 @app.get("/api/etudiant/progression/export")
@@ -1684,7 +1744,7 @@ def get_notifications(current_user: dict = Depends(get_current_user)):
             })
     
     return notifications
-# ─── PROGRESSION V2 : Sessions + Events ─────────
+
 
 @app.post("/api/progression/start")
 def start_session(cours_id: int = Form(...), current_user: dict = Depends(get_current_user)):
@@ -1710,7 +1770,29 @@ def heartbeat(session_id: int = Form(...), current_user: dict = Depends(get_curr
         )
     return {"message": "Heartbeat reçu"}
 
+@app.get("/api/forum/sujets/{sujet_id}/reponses")
+def get_reponses(sujet_id: int, current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT r.*, u.nom as auteur_nom, u.prenom as auteur_prenom
+            FROM forum_reponses r
+            JOIN users u ON r.auteur_id = u.id
+            WHERE r.sujet_id = %s
+            ORDER BY r.created_at ASC""",
+            (sujet_id,)
+        )
+        return cur.fetchall()
 
+@app.post("/api/forum/sujets/{sujet_id}/reponses", status_code=201)
+def create_reponse(sujet_id: int, data: dict, current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO forum_reponses (sujet_id, auteur_id, contenu) VALUES (%s, %s, %s) RETURNING *",
+            (sujet_id, current_user["user_id"], data["contenu"])
+        )
+        return cur.fetchone()
 @app.post("/api/progression/event")
 def log_event(
     session_id: int = Form(...),
@@ -1741,61 +1823,41 @@ def get_cours_progression(cours_id: int, current_user: dict = Depends(get_curren
     return {"progression": row["progression"] if row else None}
 @app.post("/api/progression/end")
 def end_session(session_id: int = Form(...), current_user: dict = Depends(get_current_user)):
-    """Termine une session et calcule la progression"""
+    """Termine une session sans écraser la progression calculée par valider-hybride"""
     with get_db() as conn:
         cur = conn.cursor()
-        
+
         # Fermer la session
         cur.execute(
             "UPDATE sessions_lecture SET fin = NOW(), duree_totale_secondes = EXTRACT(EPOCH FROM (NOW() - debut)) WHERE id = %s",
             (session_id,)
         )
-        
-        # Récupérer les stats de la session
+
         cur.execute("SELECT * FROM sessions_lecture WHERE id = %s", (session_id,))
         session = cur.fetchone()
-        
-        # Compter les événements
-        cur.execute("SELECT COUNT(*) as nb FROM events_pedagogiques WHERE session_id = %s", (session_id,))
-        nb_events = cur.fetchone()["nb"]
-        
-        # Récupérer la durée estimée du cours
-        cur.execute("SELECT duree_estimee_min FROM cours WHERE id = %s", (session["cours_id"],))
-        cours = cur.fetchone()
-        duree_estimee = cours["duree_estimee_min"] * 60 if cours else 1800
-        
-        # Calculer la progression
-        progression = recalculer_progression(
-            session["duree_totale_secondes"] or 0,
-            duree_estimee,
-            nb_events
-        )
-        
-        # Mettre à jour progression_cours
+
+        if not session:
+            return {"message": "Session introuvable", "progression": 0}
+
+        # Récupérer la progression existante (calculée par valider-hybride)
         cur.execute(
-            "SELECT * FROM progression_cours WHERE etudiant_id = %s AND cours_id = %s",
+            "SELECT progression FROM progression_cours WHERE etudiant_id = %s AND cours_id = %s",
             (current_user["user_id"], session["cours_id"])
         )
         existing = cur.fetchone()
-        
-        if existing:
-            cur.execute(
-                "UPDATE progression_cours SET progression = %s, complete = %s WHERE id = %s",
-                (progression, progression >= 100, existing["id"])
-            )
-        else:
+        progression_actuelle = existing["progression"] if existing else 0
+
+        # Ne créer l'entrée que si elle n'existe pas encore
+        if not existing:
             cur.execute(
                 "INSERT INTO progression_cours (etudiant_id, cours_id, progression, complete) VALUES (%s, %s, %s, %s)",
-                (current_user["user_id"], session["cours_id"], progression, progression >= 100)
+                (current_user["user_id"], session["cours_id"], 0, False)
             )
-    
+
     return {
         "message": "Session terminée",
-        "progression": progression,
-        "duree_secondes": session["duree_totale_secondes"],
-        "nb_events": nb_events
+        "progression": progression_actuelle,
     }
-
 
 
 def recalculer_progression(duree_reelle: int, duree_estimee: int, nb_events: int) -> int:
@@ -1807,161 +1869,172 @@ def recalculer_progression(duree_reelle: int, duree_estimee: int, nb_events: int
         progression = 1
     return progression
 
+
 @app.get("/api/enseignant/dashboard")
 def get_enseignant_dashboard(current_user: dict = Depends(get_current_user)):
     if current_user["role"] not in ["enseignant", "admin"]:
-        raise HTTPException(status_code=403, detail="Accès réservé aux enseignants")
-
+        raise HTTPException(status_code=403, detail="Acces reserve")
+ 
     enseignant_id = current_user["user_id"]
-
+ 
     with get_db() as conn:
         cur = conn.cursor()
-
-        # Récupérer les modules de l'enseignant
-        cur.execute(
-            """SELECT m.id, m.code, m.titre, m.couleur, m.semestre
+ 
+        # Total étudiants suivis
+        cur.execute("""
+            SELECT COUNT(DISTINCT i.etudiant_id) as total
+            FROM inscriptions i
+            JOIN enseignant_module em ON i.module_id = em.module_id
+            WHERE em.enseignant_id = %s
+        """, (enseignant_id,))
+        total_etudiants = cur.fetchone()["total"] or 0
+ 
+        # Liste des modules de l'enseignant
+        cur.execute("""
+            SELECT m.id, m.code, m.titre, m.couleur, m.semestre
             FROM modules m
             JOIN enseignant_module em ON m.id = em.module_id
             WHERE em.enseignant_id = %s AND m.actif = TRUE
-            ORDER BY m.annee_niveau, m.semestre""",
-            (enseignant_id,)
-        )
-        modules_enseignant = cur.fetchall()
-
-        # Initialiser les totaux
-        total_progression = 0
-        total_lecons_consultees = 0
-        total_etudiants_set = set()
-        nb_etudiants_risque = 0
-        tous_etudiants_progression = []  # pour le classement
-
+        """, (enseignant_id,))
+        modules_list = cur.fetchall()
+ 
         modules_stats = []
-
-        for module in modules_enseignant:
-            module_id = module["id"]
-
-            # Étudiants inscrits à ce module
+        total_progress_list = []
+        total_lecons_consultees = 0
+        total_tentatives_quiz = 0
+        etudiants_risque_set = set()
+ 
+        for m in modules_list:
+            mid = m["id"]
+ 
+            # Nombre d'étudiants inscrits au module
             cur.execute(
-                "SELECT etudiant_id FROM inscriptions WHERE module_id = %s AND annee_acad = '2024-2025'",
-                (module_id,)
+                "SELECT COUNT(DISTINCT etudiant_id) as cnt FROM inscriptions WHERE module_id = %s",
+                (mid,)
             )
-            etudiants_ids = [row["etudiant_id"] for row in cur.fetchall()]
-            nb_etudiants = len(etudiants_ids)
-            for eid in etudiants_ids:
-                total_etudiants_set.add(eid)
-
-            # Progression moyenne des étudiants dans ce module
-            cur.execute(
-                """SELECT AVG(pc.progression) as moy
+            nb_etudiants_mod = cur.fetchone()["cnt"] or 0
+ 
+            # Progression moyenne par étudiant (source unique et cohérente)
+            cur.execute("""
+                SELECT COALESCE(AVG(sub.moy), 0) as avg_prog
+                FROM (
+                    SELECT pc.etudiant_id, AVG(pc.progression) as moy
+                    FROM progression_cours pc
+                    JOIN cours c ON pc.cours_id = c.id
+                    WHERE c.module_id = %s
+                    GROUP BY pc.etudiant_id
+                ) sub
+            """, (mid,))
+            res_avg = cur.fetchone()
+            prog_moy_mod = res_avg["avg_prog"] if res_avg and res_avg["avg_prog"] is not None else 0
+ 
+            # Étudiants à risque (progression < 30%)
+            cur.execute("""
+                SELECT pc.etudiant_id, AVG(pc.progression) as moy
                 FROM progression_cours pc
                 JOIN cours c ON pc.cours_id = c.id
-                WHERE c.module_id = %s AND pc.etudiant_id IN %s""",
-                (module_id, tuple(etudiants_ids)) if etudiants_ids else (module_id, tuple([-1]))
-            )
-            moyenne_progression = cur.fetchone()["moy"] or 0
-
-            # Couverture leçons : pourcentage de cours avec progression > 0
-            cur.execute("SELECT COUNT(*) as total FROM cours WHERE module_id = %s AND publie = TRUE", (module_id,))
-            total_lecons = cur.fetchone()["total"]
-            cur.execute(
-                """SELECT COUNT(DISTINCT pc.cours_id)
-                FROM progression_cours pc
-                JOIN cours c ON pc.cours_id = c.id
-                WHERE c.module_id = %s AND pc.etudiant_id IN %s AND pc.progression > 0""",
-                (module_id, tuple(etudiants_ids)) if etudiants_ids else (module_id, tuple([-1]))
-            )
-            lecons_consultees = cur.fetchone()["count"]
-            couverture = (lecons_consultees / total_lecons * 100) if total_lecons > 0 else 0
-
+                WHERE c.module_id = %s
+                GROUP BY pc.etudiant_id
+            """, (mid,))
+            progs_etu = cur.fetchall()
+            nb_a_risque_mod = 0
+            for pe in progs_etu:
+                total_progress_list.append(pe["moy"])
+                if pe["moy"] < 30:
+                    nb_a_risque_mod += 1
+                    etudiants_risque_set.add(pe["etudiant_id"])
+ 
+            # CORRIGÉ : couverture leçons par étudiant
+            cur.execute("""
+                SELECT
+                    COUNT(pc.id) as consultes,
+                    (SELECT COUNT(*) FROM cours c2 WHERE c2.module_id = %s AND c2.publie = TRUE) *
+                    GREATEST(COUNT(DISTINCT i.etudiant_id), 1) as total_possible
+                FROM inscriptions i
+                LEFT JOIN cours c ON c.module_id = i.module_id AND c.publie = TRUE
+                LEFT JOIN progression_cours pc ON pc.cours_id = c.id
+                    AND pc.etudiant_id = i.etudiant_id
+                    AND pc.progression > 0
+                WHERE i.module_id = %s
+            """, (mid, mid))
+            res_couv = cur.fetchone()
+            if res_couv and res_couv["total_possible"] and res_couv["total_possible"] > 0:
+                couv_mod = (res_couv["consultes"] * 100) / res_couv["total_possible"]
+            else:
+                couv_mod = 0
+ 
             # Moyenne quiz
-            cur.execute(
-                """SELECT AVG(tq.note_obtenue) as moy_quiz
+            cur.execute("""
+                SELECT AVG(tq.note_obtenue) as avg_note
                 FROM tentatives_quiz tq
                 JOIN quiz q ON tq.quiz_id = q.id
-                WHERE q.module_id = %s AND tq.etudiant_id IN %s AND tq.soumis = TRUE""",
-                (module_id, tuple(etudiants_ids)) if etudiants_ids else (module_id, tuple([-1]))
-            )
-            moyenne_quiz = cur.fetchone()["moy_quiz"] or 0
-
-            # Étudiants à risque (<30% progression)
-            cur.execute(
-                """SELECT COUNT(DISTINCT pc.etudiant_id)
-                FROM progression_cours pc
+                WHERE q.module_id = %s AND tq.soumis = TRUE
+            """, (mid,))
+            res_quiz = cur.fetchone()
+            quiz_moy_mod = res_quiz["avg_note"] if res_quiz and res_quiz["avg_note"] is not None else 0
+ 
+            # Total leçons consultées (progression > 0)
+            cur.execute("""
+                SELECT COUNT(*) as cnt FROM progression_cours pc
                 JOIN cours c ON pc.cours_id = c.id
-                WHERE c.module_id = %s AND pc.etudiant_id IN %s AND pc.progression < 30""",
-                (module_id, tuple(etudiants_ids)) if etudiants_ids else (module_id, tuple([-1]))
-            )
-            nb_risque = cur.fetchone()["count"]
-
+                WHERE c.module_id = %s AND pc.progression > 0
+            """, (mid,))
+            total_lecons_consultees += cur.fetchone()["cnt"] or 0
+ 
+            # Total tentatives quiz
+            cur.execute("""
+                SELECT COUNT(*) as cnt FROM tentatives_quiz tq
+                JOIN quiz q ON tq.quiz_id = q.id
+                WHERE q.module_id = %s AND tq.soumis = TRUE
+            """, (mid,))
+            total_tentatives_quiz += cur.fetchone()["cnt"] or 0
+ 
             modules_stats.append({
-                "module_id": module_id,
-                "code": module["code"],
-                "titre": module["titre"],
-                "couleur": module["couleur"],
-                "semestre": module["semestre"],
-                "progression_moyenne": round(moyenne_progression, 1),
-                "couverture_lecons": round(couverture, 1),
-                "moyenne_quiz": round(moyenne_quiz, 1),
-                "nb_etudiants": nb_etudiants,
-                "nb_a_risque": nb_risque
+                "module_id": mid,
+                "code": m["code"],
+                "titre": m["titre"],
+                "couleur": m["couleur"],
+                "semestre": m["semestre"],
+                "progression_moyenne": round(float(prog_moy_mod), 1),
+                "couverture_lecons": round(float(couv_mod), 1),
+                "moyenne_quiz": round(float(quiz_moy_mod), 1),
+                "nb_etudiants": nb_etudiants_mod,
+                "nb_a_risque": nb_a_risque_mod
             })
-
-            total_progression += moyenne_progression * nb_etudiants if nb_etudiants > 0 else 0
-            total_lecons_consultees += lecons_consultees
-
-        # Progression globale moyenne pondérée
-        progression_globale = round(total_progression / len(total_etudiants_set), 1) if total_etudiants_set else 0
-        nb_etudiants_suivis = len(total_etudiants_set)
-
-        # Leçons totales consultées
-        lecons_consultees_total = total_lecons_consultees
-
-        # Étudiants à risque global (progression < 30% dans au moins un module)
-        cur.execute(
-            """SELECT COUNT(DISTINCT pc.etudiant_id)
-            FROM progression_cours pc
-            JOIN cours c ON pc.cours_id = c.id
-            JOIN enseignant_module em ON c.module_id = em.module_id
-            WHERE em.enseignant_id = %s AND pc.progression < 30""",
-            (enseignant_id,)
-        )
-        nb_etudiants_risque_global = cur.fetchone()["count"]
-
-        # Total tentatives de quiz
-        cur.execute(
-            """SELECT COUNT(*) as total_tentatives
-            FROM tentatives_quiz tq
-            JOIN quiz q ON tq.quiz_id = q.id
-            JOIN enseignant_module em ON q.module_id = em.module_id
-            WHERE em.enseignant_id = %s AND tq.soumis = TRUE""",
-            (enseignant_id,)
-        )
-        total_tentatives = cur.fetchone()["total_tentatives"]
-
-        # Classement des étudiants (top 10)
-        cur.execute(
-            """SELECT u.nom, u.prenom, AVG(pc.progression) as moy
-            FROM progression_cours pc
-            JOIN cours c ON pc.cours_id = c.id
-            JOIN enseignant_module em ON c.module_id = em.module_id
-            JOIN users u ON pc.etudiant_id = u.id
-            WHERE em.enseignant_id = %s
+ 
+        # Progression globale
+        if total_progress_list:
+            progression_globale = sum(total_progress_list) / len(total_progress_list)
+        else:
+            progression_globale = 0
+ 
+        # Classement top 5 étudiants
+        cur.execute("""
+            SELECT u.nom, u.prenom, COALESCE(AVG(pc.progression), 0) AS progression
+            FROM users u
+            JOIN inscriptions i ON u.id = i.etudiant_id
+            JOIN enseignant_module em ON i.module_id = em.module_id
+            LEFT JOIN cours c ON em.module_id = c.module_id
+            LEFT JOIN progression_cours pc ON c.id = pc.cours_id AND pc.etudiant_id = u.id
+            WHERE em.enseignant_id = %s AND u.role = 'etudiant'
             GROUP BY u.id, u.nom, u.prenom
-            ORDER BY moy DESC
-            LIMIT 10""",
-            (enseignant_id,)
-        )
-        classement = [{"nom": e["nom"], "prenom": e["prenom"], "progression": round(e["moy"], 1)} for e in cur.fetchall()]
-
+            ORDER BY progression DESC LIMIT 5
+        """, (enseignant_id,))
+        classement_etudiants = cur.fetchall()
+        for cl in classement_etudiants:
+            cl["progression"] = round(float(cl["progression"]), 1)
+ 
     return {
-        "progression_globale": progression_globale,
-        "nb_etudiants_suivis": nb_etudiants_suivis,
-        "lecons_consultees": lecons_consultees_total,
-        "nb_etudiants_risque": nb_etudiants_risque_global,
-        "total_tentatives": total_tentatives,
+        "progression_globale": round(float(progression_globale), 1),
+        "nb_etudiants_suivis": total_etudiants,
+        "lecons_consultees": total_lecons_consultees,
+        "nb_etudiants_risque": len(etudiants_risque_set),
+        "total_tentatives": total_tentatives_quiz,
         "modules": modules_stats,
-        "classement": classement
+        "classement": classement_etudiants
     }
+
+
 @app.get("/api/enseignant/modules/stats")
 def get_enseignant_modules_stats(current_user: dict = Depends(get_current_user)):
     if current_user["role"] not in ["enseignant", "admin"]:
@@ -2028,7 +2101,7 @@ def get_enseignant_modules_stats(current_user: dict = Depends(get_current_user))
             })
 
     return result
-# ─── RESSOURCES ENSEIGNANT ──────────────────────
+
 @app.get("/api/enseignant/ressources")
 def get_enseignant_ressources(current_user: dict = Depends(get_current_user)):
     if current_user["role"] not in ["enseignant", "admin"]:
@@ -2254,7 +2327,7 @@ def export_notes_complet(current_user: dict = Depends(get_current_user), module_
             )
         etudiants = cur.fetchall()
 
-        # 2. Récupérer les modules de l'enseignant (pour les colonnes de progression)
+        # 2. Récupérer les modules de l'enseignant 
         if module_id:
             cur.execute(
                 "SELECT id, code, titre FROM modules WHERE id = %s",
@@ -2271,7 +2344,7 @@ def export_notes_complet(current_user: dict = Depends(get_current_user), module_
             )
         modules = cur.fetchall()
 
-        # 3. Récupérer les quiz de l'enseignant (pour les colonnes de notes)
+        # 3. Récupérer les quiz de l'enseignant 
         if module_id:
             cur.execute(
                 "SELECT id, titre, module_id FROM quiz WHERE module_id = %s ORDER BY id",
@@ -2441,7 +2514,7 @@ def get_admin_dashboard(current_user: dict = Depends(get_current_user)):
         "total_enseignants": total_enseignants,
         "total_admins": total_admins,
         "total_users": total_users,
-        "comptes_suspendus": comptes_suspendus,      # <-- AJOUTÉ
+        "comptes_suspendus": comptes_suspendus,      
         "total_modules": total_modules,
         "total_ressources": total_ressources,
         "total_annonces": total_annonces,
@@ -2451,9 +2524,7 @@ def get_admin_dashboard(current_user: dict = Depends(get_current_user)):
         "dernieres_annonces": dernieres_annonces,
     }
 
-# ============================================================
-# ADMIN - GESTION DES UTILISATEURS
-# ============================================================
+
 
 @app.get("/api/admin/users")
 def get_admin_users(current_user: dict = Depends(get_current_user)):
@@ -2479,7 +2550,7 @@ def toggle_user_actif(user_id: int, current_user: dict = Depends(get_current_use
 
     with get_db() as conn:
         cur = conn.cursor()
-        # Ne pas permettre de suspendre le compte admin en cours si c'est le seul ?
+        # Ne pas permettre de suspendre le compte admin en cours si c'est le seul bach n assurer que l admin existe
         cur.execute("SELECT actif FROM users WHERE id = %s", (user_id,))
         user = cur.fetchone()
         if not user:
@@ -2831,6 +2902,131 @@ def delete_annonce(annonce_id: int, current_user: dict = Depends(get_current_use
         if cur.rowcount == 0:
             raise HTTPException(status_code=404, detail="Annonce non trouvée ou non autorisée")
     return {"message": "Annonce supprimée"}
+
+import secrets
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from pydantic import BaseModel, EmailStr
+from dotenv import load_dotenv
+ 
+load_dotenv()
+print("MAIL CONFIG →", {
+    "username": os.getenv("MAIL_USERNAME"),
+    "server":   os.getenv("MAIL_SERVER"),
+    "port":     os.getenv("MAIL_PORT"),
+    "from":     os.getenv("MAIL_FROM"),
+    "password": "***" if os.getenv("MAIL_PASSWORD") else "❌ MANQUANT",
+})
+
+mail_conf = ConnectionConfig(
+    MAIL_USERNAME   = os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD   = os.getenv("MAIL_PASSWORD"),
+    MAIL_FROM       = os.getenv("MAIL_FROM"),
+    MAIL_PORT       = int(os.getenv("MAIL_PORT", 587)),
+    MAIL_SERVER     = os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+    MAIL_STARTTLS   = True,
+    MAIL_SSL_TLS    = False,
+    USE_CREDENTIALS = True,
+)
+ 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+ 
+# --- Modèles Pydantic ---
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+ 
+class ResetPasswordRequest(BaseModel):
+    token: str
+    nouveau_mot_de_passe: str
+ 
+ 
+
+@app.post("/api/auth/forgot-password")
+async def forgot_password(body: ForgotPasswordRequest):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT id, nom, prenom FROM users WHERE email = %s AND actif = TRUE", (body.email,))
+        user = cur.fetchone()
+
+        if not user:
+            return {"message": "Si cet email existe, un code a été envoyé."}
+
+        code = str(secrets.randbelow(900000) + 100000)
+        expire = datetime.utcnow() + timedelta(minutes=15)
+
+        cur.execute("DELETE FROM password_reset_tokens WHERE user_id = %s", (user["id"],))
+        cur.execute(
+            "INSERT INTO password_reset_tokens (user_id, token, expire_le) VALUES (%s, %s, %s)",
+            (user["id"], code, expire)
+        )
+
+    
+    print(f"\n{'='*40}")
+    print(f"DEBUG RESET CODE")
+    print(f"Email  : {body.email}")
+    print(f"Code   : {code}")
+    print(f"Expire : {expire}")
+    print(f"{'='*40}\n")
+
+    try:
+        fm = FastMail(mail_conf)
+        await fm.send_message(message)
+        print("✅ Email envoyé avec succès")
+    except Exception as e:
+        print(f"❌ Erreur envoi email : {e}")
+        # ← Retourner le code dans la réponse en mode dev
+        return {"message": "Erreur email (mode dev)", "code_debug": code}
+
+    return {"message": "Code envoyé."}
+ 
+
+@app.post("/api/auth/reset-password")
+def reset_password(body: ResetPasswordRequest):
+    if len(body.nouveau_mot_de_passe) < 6:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins 6 caractères")
+ 
+    with get_db() as conn:
+        cur = conn.cursor()
+ 
+        # Vérifier le token
+        cur.execute(
+            """SELECT * FROM password_reset_tokens
+               WHERE token = %s AND utilise = FALSE AND expire_le > NOW()""",
+            (body.token,)
+        )
+        reset_entry = cur.fetchone()
+ 
+        if not reset_entry:
+            raise HTTPException(status_code=400, detail="Lien invalide ou expiré")
+ 
+        # Mettre à jour le mot de passe
+        nouveau_hash = hash_password(body.nouveau_mot_de_passe)
+        cur.execute(
+            "UPDATE users SET mot_de_passe = %s WHERE id = %s",
+            (nouveau_hash, reset_entry["user_id"])
+        )
+ 
+        # Marquer le token comme utilisé
+        cur.execute(
+            "UPDATE password_reset_tokens SET utilise = TRUE WHERE id = %s",
+            (reset_entry["id"],)
+        )
+ 
+    return {"message": "Mot de passe réinitialisé avec succès"}
+ 
+ 
+
+@app.get("/api/auth/verify-reset-token")
+def verify_reset_token(token: str):
+    with get_db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT id FROM password_reset_tokens
+               WHERE token = %s AND utilise = FALSE AND expire_le > NOW()""",
+            (token,)
+        )
+        if not cur.fetchone():
+            raise HTTPException(status_code=400, detail="Lien invalide ou expiré")
+    return {"valid": True}
 # DÉMARRAGE
 # ============================================================
 

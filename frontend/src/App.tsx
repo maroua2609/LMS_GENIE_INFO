@@ -14,7 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import AdminUsers from './pages/admin/Users';
 import AdminModules from './pages/admin/Modules';   // correct
-import AdminStatistiques from './pages/admin/Statistiques';
+
 import EnseignantMesCours from './pages/enseignant/MesCours';
 import EnseignantCreateCours from './pages/enseignant/CreateCours';
 import EnseignantCreateQuiz from './pages/enseignant/CreateQuiz';
@@ -36,6 +36,8 @@ import ModuleCreate from './pages/admin/ModuleCreate';
 import ModuleEdit from './pages/admin/ModuleEdit';
 import AdminModeration from './pages/admin/Moderation';
 import AdminAnnonceCreate from './pages/admin/AnnonceCreate';
+import EtudiantForum from './pages/etudiant/EtudiantForum';
+import ResetPassword from './pages/auth/ResetPassword';
 // ...
 const App: React.FC = () => {
   return (
@@ -44,6 +46,7 @@ const App: React.FC = () => {
         {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Étudiant */}
         <Route element={<ProtectedRoute />}>
@@ -53,6 +56,8 @@ const App: React.FC = () => {
           <Route path="/etudiant/cours/:id" element={<EtudiantCoursDetail />} />
           <Route path="/etudiant/quiz/:id" element={<EtudiantQuiz />} />
           <Route path="/etudiant/progression" element={<EtudiantProgression />} />
+          <Route path="/etudiant/forum" element={<EtudiantForum />} />
+          <Route path="/forum/:moduleId?" element={<EtudiantForum />} />
         </Route>
 
         {/* Enseignant */}
@@ -77,7 +82,7 @@ const App: React.FC = () => {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/modules" element={<AdminModules />} />
-          <Route path="/admin/statistiques" element={<AdminStatistiques />} />
+          
           <Route path="/admin/users/:id/edit" element={<AdminUserEdit />} />
           <Route path="/admin/users/create" element={<AdminUserCreate />} />
         </Route>

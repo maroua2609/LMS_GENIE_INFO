@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
-  // Version simple sans useAuth (si vous n'avez pas encore ce hook)
+ 
   const token = localStorage.getItem('access_token');
   const userRole = localStorage.getItem('user_role') as UserRole | null;
 

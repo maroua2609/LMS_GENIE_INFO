@@ -70,14 +70,14 @@ const EtudiantModules: React.FC = () => {
     <div className="min-h-screen bg-gray-950">
       <div className="flex">
         
-        {/* SIDEBAR */}
+       
         <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 bg-gray-900/30 border-r border-gray-800/50 p-6">
           <div className="flex items-center gap-3 mb-10">
             <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
               <Zap size={20} className="text-white" />
             </div>
             <div>
-              <h1 className="text-white font-bold text-sm">LMS Génie Info</h1>
+              <h1 className="text-white font-bold text-sm">GINFLMS</h1>
               <p className="text-gray-500 text-xs">Plateforme académique</p>
             </div>
           </div>
@@ -125,7 +125,7 @@ const EtudiantModules: React.FC = () => {
           </div>
         </aside>
 
-        {/* CONTENU PRINCIPAL */}
+        
         <main className="flex-1 p-6 lg:p-10 min-h-screen">
           
           {/* Top bar mobile */}
@@ -141,13 +141,13 @@ const EtudiantModules: React.FC = () => {
             </div>
           </div>
 
-          {/* En-tête */}
+          
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Tous les modules</h1>
             <p className="text-gray-400">{modules.length} modules disponibles</p>
           </div>
 
-          {/* Filtres */}
+          
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
             <div className="relative flex-1">
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -176,7 +176,7 @@ const EtudiantModules: React.FC = () => {
             </div>
           </div>
 
-          {/* Grille modules */}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredModules.map((module) => (
               <Link

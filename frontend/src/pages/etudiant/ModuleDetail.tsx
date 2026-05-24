@@ -46,7 +46,7 @@ const EtudiantModuleDetail: React.FC = () => {
         setQuiz(quizRes.data);
         setEnseignant(enseignantRes.data);
 
-        // Charger les ressources de tous les cours
+        
         const allRessources: Ressource[] = [];
         for (const c of coursRes.data) {
           try {
@@ -115,14 +115,14 @@ const EtudiantModuleDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-950 flex">
       
-      {/* SIDEBAR */}
+      
       <aside className="hidden lg:flex flex-col w-72 h-screen sticky top-0 bg-gray-900/30 border-r border-gray-800/50 p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
             <Zap size={20} className="text-white" />
           </div>
           <div>
-            <h1 className="text-white font-bold text-sm">LMS Génie Info</h1>
+            <h1 className="text-white font-bold text-sm">GINFLMS</h1>
             <p className="text-gray-500 text-xs">Plateforme académique</p>
           </div>
         </div>
@@ -233,10 +233,10 @@ const EtudiantModuleDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* CONTENU DES ONGLETS */}
+        
         <div className="max-w-5xl mx-auto px-6 lg:px-10 py-8">
           
-          {/* ONGLET LEÇONS */}
+          
           {activeTab === 'lecons' && (
             <div className="space-y-3">
               {filteredCours.length === 0 ? (
@@ -271,7 +271,6 @@ const EtudiantModuleDetail: React.FC = () => {
             </div>
           )}
 
-          {/* ONGLET RESSOURCES */}
           {activeTab === 'ressources' && (
             <div>
               {ressources.length === 0 ? (
@@ -300,7 +299,7 @@ const EtudiantModuleDetail: React.FC = () => {
             </div>
           )}
 
-          {/* ONGLET QUIZ */}
+          
           {activeTab === 'quiz' && (
             <div>
               {quiz.length === 0 ? (
@@ -333,7 +332,7 @@ const EtudiantModuleDetail: React.FC = () => {
             </div>
           )}
 
-          {/* ONGLET ANNONCES */}
+          
           {activeTab === 'annonces' && (
             <div className="text-center py-16">
               <Megaphone size={48} className="text-gray-700 mx-auto mb-4" />
@@ -341,7 +340,7 @@ const EtudiantModuleDetail: React.FC = () => {
             </div>
           )}
 
-          {/* ONGLET FORUM */}
+          
           {activeTab === 'forum' && (
             <div className="text-center py-16">
               <MessageCircle size={48} className="text-gray-700 mx-auto mb-4" />

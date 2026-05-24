@@ -30,7 +30,7 @@ interface QuizExistant {
 }
 
 const EnseignantCreateQuiz: React.FC = () => {
-  // État du formulaire
+  
   const [module_id, setModuleId] = useState('');
   const [titre, setTitre] = useState('');
   const [description, setDescription] = useState('');
@@ -39,19 +39,19 @@ const EnseignantCreateQuiz: React.FC = () => {
   const [duree_min, setDureeMin] = useState(30);
   const [questions, setQuestions] = useState<QuestionForm[]>([]);
 
-  // Données chargées
+  
   const [modules, setModules] = useState<Module[]>([]);
   const [quizExistants, setQuizExistants] = useState<QuizExistant[]>([]);
   const [user, setUser] = useState<any>(null);
 
-  // États UI
+  
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
-  // Chargement initial
+  
   useEffect(() => {
     const stored = localStorage.getItem('user');
     if (stored) setUser(JSON.parse(stored));
@@ -67,14 +67,14 @@ const EnseignantCreateQuiz: React.FC = () => {
       .catch(console.error);
   }, []);
 
-  // Actions sidebar
+  
   const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
   };
   const getInitiales = () => user ? `${user.prenom?.charAt(0) || ''}${user.nom?.charAt(0) || ''}` : '??';
 
-  // Gestion des questions
+  
   const addQuestion = () => {
     setQuestions([...questions, {
       enonce: '',
@@ -139,10 +139,10 @@ const EnseignantCreateQuiz: React.FC = () => {
         }))
       });
       setSuccess('Quiz créé avec succès !');
-      // Recharger la liste des quiz
+      
       const updated = await api.get<QuizExistant[]>('/enseignant/quiz');
       setQuizExistants(updated.data);
-      // Réinitialiser le formulaire
+      
       setTitre('');
       setDescription('');
       setType('qcm');
@@ -157,7 +157,7 @@ const EnseignantCreateQuiz: React.FC = () => {
     }
   };
 
-  // Suppression d'un quiz existant
+  
   const handleDeleteQuiz = async (quizId: number) => {
     if (!confirm('Supprimer ce quiz ?')) return;
     try {
@@ -178,29 +178,20 @@ const EnseignantCreateQuiz: React.FC = () => {
             <GraduationCap size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ENSEIGNANT</p>
           </div>
         </div>
 
         <nav className="space-y-1 mb-6">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Enseignement</p>
-          <Link to="/enseignant/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm">
-            <BarChart3 size={18} /> Tableau de bord
-          </Link>
-          <Link to="/enseignant/modules" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm">
-            <BookOpen size={18} /> Mes modules
-          </Link>
-          <Link to="/enseignant/ressources" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm">
-            <FileText size={18} /> Ressources
-          </Link>
-          <Link to="/enseignant/annonces" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm">
-            <Megaphone size={18} /> Annonces
-          </Link>
-          <Link to="/enseignant/quiz/create" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 font-medium text-sm">
-            <ClipboardCheck size={18} /> Évaluations
-          </Link>
-        </nav>
+                  <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Enseignement</p>
+                  <Link to="/enseignant/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 font-medium text-sm"><BarChart3 size={18} /> Tableau de bord</Link>
+                  <Link to="/enseignant/modules" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Mes modules</Link>
+                  <Link to="/enseignant/ressources" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><FileText size={18} /> Ressources</Link>
+                  <Link to="/enseignant/annonces" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><Megaphone size={18} /> Annonces</Link>
+                  <Link to="/enseignant/quiz/create" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Évaluations</Link>
+                  <Link to="/enseignant/notes" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50"><BookOpen size={18} /> Progression</Link>
+                </nav>
 
         <nav className="space-y-1 mt-auto">
           <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>

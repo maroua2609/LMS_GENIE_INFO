@@ -31,7 +31,7 @@ const AdminAnnonceCreate: React.FC = () => {
     contenu: '',
     type: 'information',
     module_id: '' as number | '',
-    enseignant_id: '' as number | '', // optionnel
+    enseignant_id: '' as number | '', 
   });
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -39,7 +39,7 @@ const AdminAnnonceCreate: React.FC = () => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    // Récupérer l'utilisateur connecté
+    
     api.get('/auth/me')
       .then(res => {
         setUser(res.data);
@@ -64,7 +64,7 @@ const AdminAnnonceCreate: React.FC = () => {
       .finally(() => setLoading(false));
   }, [navigate]);
 
-  // Charger l'enseignant associé au module sélectionné (pour info)
+  
   useEffect(() => {
     if (!form.module_id) {
       setModuleEnseignant('');
@@ -106,8 +106,7 @@ const AdminAnnonceCreate: React.FC = () => {
         type: form.type,
         module_id: form.module_id === '' ? null : form.module_id,
       };
-      // Si vous avez modifié le backend pour accepter enseignant_id, décommentez la ligne suivante
-      // if (form.enseignant_id) payload.enseignant_id = form.enseignant_id;
+      
 
       await api.post('/annonces', payload);
       setSuccess('Annonce publiée avec succès !');
@@ -127,14 +126,14 @@ const AdminAnnonceCreate: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
-      {/* Sidebar identique - le code est le même que précédemment, je le coupe pour la lisibilité */}
+      
       <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-gray-900/30 border-r border-gray-800/50 p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
             <ShieldCheck size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ADMINISTRATEUR</p>
           </div>
         </div>
@@ -146,10 +145,8 @@ const AdminAnnonceCreate: React.FC = () => {
           <Link to="/admin/moderation" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><ShieldCheck size={18} /> Modération</Link>
         </nav>
         <nav className="space-y-1 mt-auto">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
-          <Link to="/admin/activite" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><TrendingUp size={18} /> Activité</Link>
-          <Link to="/admin/forum" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><MessageCircle size={18} /> Forum</Link>
-        </nav>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3"></p>
+         </nav>
         <div className="pt-6 border-t border-gray-800 mt-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-violet-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">{getInitiales()}</div>
@@ -159,7 +156,7 @@ const AdminAnnonceCreate: React.FC = () => {
         </div>
       </aside>
 
-      {/* Contenu principal */}
+      
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-4 mb-8">

@@ -48,7 +48,7 @@ const AdminModeration: React.FC = () => {
   const [filterModule, setFilterModule] = useState<string>('tous');
   const [modules, setModules] = useState<{ id: number; titre: string }[]>([]);
 
-  // Récupérer l'utilisateur courant
+  
   useEffect(() => {
     api.get('/auth/me')
       .then(res => {
@@ -68,7 +68,7 @@ const AdminModeration: React.FC = () => {
     try {
       const [annoncesRes, sujetsRes] = await Promise.all([
         api.get<Annonce[]>('/annonces'),
-        api.get<Sujet[]>('/forum/sujets') // endpoint à adapter selon votre backend
+        api.get<Sujet[]>('/forum/sujets') 
       ]);
       setAnnonces(annoncesRes.data);
       setSujets(sujetsRes.data);
@@ -93,7 +93,7 @@ const AdminModeration: React.FC = () => {
   const handleLogout = () => { localStorage.clear(); navigate('/login'); };
   const getInitiales = () => user ? `${user.prenom?.charAt(0) || ''}${user.nom?.charAt(0) || ''}` : '??';
 
-  // Supprimer une annonce
+  
   const deleteAnnonce = async (id: number) => {
     try {
       await api.delete(`/annonces/${id}`);
@@ -104,7 +104,7 @@ const AdminModeration: React.FC = () => {
     }
   };
 
-  // Supprimer un sujet de forum (avec toutes ses réponses)
+  
   const deleteSujet = async (id: number) => {
     try {
       await api.delete(`/forum/sujets/${id}`);
@@ -115,7 +115,7 @@ const AdminModeration: React.FC = () => {
     }
   };
 
-  // Masquer / publier une annonce
+ 
   const toggleAnnonce = async (id: number, currentStatus: boolean) => {
     try {
       await api.put(`/annonces/${id}/toggle`, { publie: !currentStatus });
@@ -126,7 +126,7 @@ const AdminModeration: React.FC = () => {
     }
   };
 
-  // Ouvrir la confirmation
+  
   const confirmAction = (item: any, type: 'delete' | 'toggle') => {
     setSelectedItem(item);
     setActionType(type);
@@ -146,7 +146,7 @@ const AdminModeration: React.FC = () => {
     setActionType('');
   };
 
-  // Filtrage par module
+  
   const filteredAnnonces = filterModule === 'tous' 
     ? annonces 
     : annonces.filter(a => a.module_id?.toString() === filterModule);
@@ -163,14 +163,14 @@ const AdminModeration: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
-      {/* Sidebar Admin (identique aux autres pages) */}
+      
       <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-gray-900/30 border-r border-gray-800/50 p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
             <ShieldCheck size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ADMINISTRATEUR</p>
           </div>
         </div>
@@ -184,10 +184,8 @@ const AdminModeration: React.FC = () => {
         </nav>
 
         <nav className="space-y-1 mt-auto">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
-          <Link to="/admin/activite" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><TrendingUp size={18} /> Activité</Link>
-          <Link to="/admin/forum" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><MessageCircle size={18} /> Forum</Link>
-        </nav>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3"></p>
+          </nav>
 
         <div className="pt-6 border-t border-gray-800 mt-6">
           <div className="flex items-center gap-3 mb-3">
@@ -198,7 +196,7 @@ const AdminModeration: React.FC = () => {
         </div>
       </aside>
 
-      {/* Contenu principal */}
+      
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
   <div className="flex items-center justify-between mb-8">
     <div>
@@ -213,7 +211,7 @@ const AdminModeration: React.FC = () => {
     </Link>
   </div>
 
-        {/* Cartes statistiques */}
+        
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-5">
             <Megaphone size={24} className="text-blue-400 mb-3" />
@@ -228,7 +226,7 @@ const AdminModeration: React.FC = () => {
           </div>
         </div>
 
-        {/* Onglets */}
+        
         <div className="flex gap-2 border-b border-gray-800 mb-6">
           <button
             onClick={() => setActiveTab('annonces')}
@@ -252,7 +250,7 @@ const AdminModeration: React.FC = () => {
           </button>
         </div>
 
-        {/* Filtre par module */}
+        
         <div className="flex items-center gap-3 mb-6">
           <Filter size={16} className="text-gray-400" />
           <select
@@ -270,7 +268,7 @@ const AdminModeration: React.FC = () => {
           </button>
         </div>
 
-        {/* Liste des annonces */}
+        
         {activeTab === 'annonces' && (
           <div className="space-y-4">
             {filteredAnnonces.map(annonce => (
@@ -366,7 +364,7 @@ const AdminModeration: React.FC = () => {
         )}
       </main>
 
-      {/* Modal de confirmation */}
+      
       {showConfirm && selectedItem && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md">

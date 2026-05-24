@@ -5,11 +5,11 @@ import {
   BookOpen, Search, LogOut, Users, ShieldCheck,
   BarChart3, TrendingUp, FileText, Megaphone, Layers, MessageCircle,
   Plus, Pencil, Trash2, X, RefreshCw,
-  // Seules les icônes réellement utilisées
+  
   Database, Wifi, Server, Globe, Brain, GitBranch
 } from 'lucide-react';
 
-// Mapping des noms d'icônes stockés en base
+
 const iconMap: Record<string, React.ElementType> = {
   database: Database,
   wifi: Wifi,
@@ -145,14 +145,14 @@ const AdminModules: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
-      {/* SIDEBAR - identique à l'original */}
+      
       <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-gray-900/30 border-r border-gray-800/50 p-6">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
             <ShieldCheck size={22} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">CodexLMS</p>
+            <p className="text-white font-bold text-sm">GINFLMS</p>
             <p className="text-gray-500 text-xs">ESPACE ADMINISTRATEUR</p>
           </div>
         </div>
@@ -166,9 +166,8 @@ const AdminModules: React.FC = () => {
         </nav>
 
         <nav className="space-y-1 mt-auto">
-          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3">Communauté</p>
-          <Link to="/admin/activite" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><TrendingUp size={18} /> Activité</Link>
-          <Link to="/admin/forum" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 font-medium text-sm"><MessageCircle size={18} /> Forum</Link>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-3"></p>
+          
         </nav>
 
         <div className="pt-6 border-t border-gray-800 mt-6">
@@ -180,7 +179,7 @@ const AdminModules: React.FC = () => {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      
       <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -272,7 +271,7 @@ const AdminModules: React.FC = () => {
           {filtered.length === 0 && <div className="text-center py-12 text-gray-500">Aucun module trouvé.</div>}
         </div>
 
-        {/* Modal suppression */}
+        
         {deleteTarget && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
             <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md">
